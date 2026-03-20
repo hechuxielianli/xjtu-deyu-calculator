@@ -76,17 +76,17 @@ const IconShare = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24"
 const cn = (...a) => a.filter(Boolean).join(" ");
 
 function Card({ children, className }) {
-  return <div className={cn("rounded-xl border p-4 sm:p-5 shadow-sm transition-colors border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800", className)}>{children}</div>;
+  return <div className={cn("rounded-2xl border p-4 sm:p-5 shadow-sm transition-colors border-slate-200/80 bg-white dark:border-slate-700/60 dark:bg-slate-800/80 backdrop-blur-sm", className)}>{children}</div>;
 }
 
-function Badge({ children, color = "stone" }) {
+function Badge({ children, color = "slate" }) {
   const c = {
-    teal: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/40 dark:text-teal-300 dark:border-teal-800",
-    orange: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800",
-    amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800",
-    red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800",
-    stone: "bg-stone-100 text-stone-600 border-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:border-stone-600",
-    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800",
+    teal: "bg-teal-50 text-teal-700 border-teal-200/60 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50",
+    orange: "bg-orange-50 text-orange-700 border-orange-200/60 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50",
+    amber: "bg-amber-50 text-amber-700 border-amber-200/60 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50",
+    red: "bg-red-50 text-red-700 border-red-200/60 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50",
+    slate: "bg-slate-100 text-slate-600 border-slate-200/60 dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-600/50",
+    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50",
   };
   return <span className={cn("inline-block rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap", c[color])}>{children}</span>;
 }
@@ -97,11 +97,11 @@ function SectionTitle({ icon, title, subtitle, score, maxScore, color }) {
     <div className="mb-4">
       <div className="flex items-center gap-2 mb-1">
         <span className="text-lg">{icon}</span>
-        <h2 className="text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100">{title}</h2>
-        <span className="ml-auto font-mono text-sm font-semibold text-stone-700 dark:text-stone-200">{score.toFixed(1)}<span className="text-stone-400 dark:text-stone-500">/{maxScore}</span></span>
+        <h2 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
+        <span className="ml-auto font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{maxScore}</span></span>
       </div>
-      {subtitle && <p className="text-xs text-stone-500 dark:text-stone-400 mb-2 ml-7">{subtitle}</p>}
-      <div className="h-1.5 rounded-full bg-stone-100 dark:bg-stone-700 overflow-hidden">
+      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-7">{subtitle}</p>}
+      <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
         <div className={cn("h-full rounded-full transition-all duration-500", bar[color])} style={{ width: `${Math.min(100, (score / maxScore) * 100)}%` }} />
       </div>
     </div>
@@ -111,9 +111,9 @@ function SectionTitle({ icon, title, subtitle, score, maxScore, color }) {
 function Field({ label, children, hint }) {
   return (
     <div className="mb-3">
-      <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
       {children}
-      {hint && <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -121,7 +121,7 @@ function Field({ label, children, hint }) {
 function Select({ value, onChange, options, className }) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)}
-      className={cn("w-full rounded-lg border px-3 py-2 text-sm outline-none transition border-stone-200 bg-white text-stone-700 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-200 dark:focus:border-teal-500", className)}>
+      className={cn("w-full rounded-lg border px-3 py-2 text-sm outline-none transition border-slate-200 bg-white text-slate-700 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:focus:border-teal-500", className)}>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -131,7 +131,7 @@ function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
   return (
     <input type="number" value={value} min={min} max={max} step={step}
       onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
-      className="w-20 rounded-lg border px-3 py-2 text-sm text-center outline-none transition border-stone-200 bg-white text-stone-700 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-200 dark:focus:border-teal-500" />
+      className="w-20 rounded-lg border px-3 py-2 text-sm text-center outline-none transition border-slate-200 bg-white text-slate-700 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:focus:border-teal-500" />
   );
 }
 
@@ -139,11 +139,11 @@ function Checkbox({ checked, onChange, label }) {
   return (
     <label className="flex items-start gap-2 cursor-pointer group">
       <div className={cn("w-4 h-4 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all",
-        checked ? "bg-teal-500 border-teal-500" : "border-stone-300 group-hover:border-stone-400 dark:border-stone-500")}>
+        checked ? "bg-teal-500 border-teal-500" : "border-slate-300 group-hover:border-slate-400 dark:border-slate-500")}>
         {checked && <IconCheck />}
       </div>
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
-      <span className="text-sm text-stone-700 dark:text-stone-300">{label}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </label>
   );
 }
@@ -159,11 +159,11 @@ function AddButton({ onClick, label }) {
 
 function DynamicItem({ children, onRemove, score }) {
   return (
-    <div className="flex items-start gap-2 p-3 rounded-lg mb-2 border border-stone-100 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/50">
+    <div className="flex items-start gap-2 p-3 rounded-lg mb-2 border border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
       <div className="flex-1 flex flex-wrap gap-2 items-end">{children}</div>
       <div className="flex items-center gap-1.5 pt-1 shrink-0">
         {score !== undefined && <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded text-teal-600 bg-teal-50 dark:text-teal-300 dark:bg-teal-900/40">{score >= 0 ? "+" : ""}{score}</span>}
-        <button onClick={onRemove} className="text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 p-1 rounded transition"><IconX /></button>
+        <button onClick={onRemove} className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-1 rounded transition"><IconX /></button>
       </div>
     </div>
   );
@@ -171,11 +171,11 @@ function DynamicItem({ children, onRemove, score }) {
 
 function TabNav({ active, onChange, tabs }) {
   return (
-    <div className="flex gap-1 rounded-xl p-1 mb-5 bg-stone-100 dark:bg-stone-800">
+    <div className="flex gap-1 rounded-2xl p-1 mb-5 bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/40">
       {tabs.map(t => (
         <button key={t.key} onClick={() => onChange(t.key)}
-          className={cn("flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all",
-            active === t.key ? "bg-white text-stone-800 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-500 dark:text-stone-400")}>
+          className={cn("flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-all",
+            active === t.key ? "bg-white text-slate-800 shadow-md dark:bg-slate-700 dark:text-slate-100" : "text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300")}>
           <span className="mr-1">{t.icon}</span>{t.label}
         </button>
       ))}
@@ -311,21 +311,21 @@ function ExportModal({ scores, isDark, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 max-h-[90vh] flex flex-col"
+      <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-stone-200 dark:border-stone-700 shrink-0">
-          <h3 className="text-sm font-semibold text-stone-800 dark:text-stone-100">导出得分</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-500 transition"><IconX /></button>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">导出得分</h3>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition"><IconX /></button>
         </div>
         <div className="p-4 overflow-auto">
-          <div ref={previewRef} className="mb-4 rounded-lg overflow-hidden border border-stone-100 dark:border-stone-700" />
+          <div ref={previewRef} className="mb-4 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-700" />
           <div className="flex gap-3">
             <button onClick={saveImage}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition bg-teal-600 text-white hover:bg-teal-700 active:scale-[0.98]">
               <IconCamera />保存图片
             </button>
             <button onClick={printPDF}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition border border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 active:scale-[0.98]">
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.98]">
               <IconPrinter />打印 / PDF
             </button>
           </div>
@@ -445,31 +445,31 @@ export default function App() {
   return (
     <div className={dark ? "dark" : ""}>
       <div style={{ fontFamily: "'Noto Sans SC','PingFang SC',-apple-system,sans-serif" }}
-        className="min-h-screen transition-colors bg-stone-50 dark:bg-stone-900">
+        className="min-h-screen transition-colors bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
 
         {/* ── HEADER ── */}
-        <div className="sticky top-0 z-50 border-b backdrop-blur-xl transition-colors bg-white/80 border-stone-200 dark:bg-stone-900/80 dark:border-stone-700">
+        <div className="sticky top-0 z-50 border-b backdrop-blur-xl transition-colors bg-white/70 border-slate-200/60 dark:bg-slate-900/70 dark:border-slate-700/50">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-bold tracking-tight truncate text-stone-800 dark:text-stone-100">西安交通大学 · 综合素质测评计算器</h1>
-                <p className="text-xs truncate text-stone-400 dark:text-stone-500 hidden sm:block">依据《本科生专业选择综合素质测评内容及评分标准》</p>
+                <h1 className="text-sm sm:text-base font-bold tracking-tight truncate text-slate-800 dark:text-slate-100">西安交通大学 · 综合素质测评计算器</h1>
+                <p className="text-xs truncate text-slate-400 dark:text-slate-500 hidden sm:block">依据《本科生专业选择综合素质测评内容及评分标准》</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => setShowExport(true)} title="导出" className="p-2 rounded-lg transition hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400"><IconShare /></button>
-                <button onClick={() => setDark(!dark)} title={dark ? "浅色" : "深色"} className="p-2 rounded-lg transition hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400">{dark ? <IconSun /> : <IconMoon />}</button>
+                <button onClick={() => setShowExport(true)} title="导出" className="p-2 rounded-lg transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"><IconShare /></button>
+                <button onClick={() => setDark(!dark)} title={dark ? "浅色" : "深色"} className="p-2 rounded-lg transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">{dark ? <IconSun /> : <IconMoon />}</button>
                 <div className="text-right ml-1">
-                  <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-stone-800 dark:text-stone-100">{scores.total.toFixed(1)}</div>
-                  <div className="text-xs text-stone-400 dark:text-stone-500 -mt-0.5">/ 105</div>
+                  <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-slate-800 dark:text-slate-100">{scores.total.toFixed(1)}</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 -mt-0.5">/ 105</div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-0.5 h-2 rounded-full overflow-hidden bg-stone-100 dark:bg-stone-700">
+            <div className="flex gap-0.5 h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/60">
               <div className="bg-teal-500 rounded-l-full transition-all duration-500" style={{ width: `${(scores.conduct.total / 105) * 100}%` }} />
               <div className="bg-orange-500 transition-all duration-500" style={{ width: `${(scores.ability.total / 105) * 100}%` }} />
               <div className="bg-amber-500 rounded-r-full transition-all duration-500" style={{ width: `${(scores.reward.total / 105) * 100}%` }} />
             </div>
-            <div className="flex justify-between mt-1 text-xs text-stone-500 dark:text-stone-400">
+            <div className="flex justify-between mt-1 text-xs text-slate-500 dark:text-slate-400">
               <span><span className="inline-block w-2 h-2 rounded-full bg-teal-500 mr-1 align-middle" />品行 {scores.conduct.total.toFixed(1)}</span>
               <span><span className="inline-block w-2 h-2 rounded-full bg-orange-500 mr-1 align-middle" />能力 {scores.ability.total.toFixed(1)}</span>
               <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1 align-middle" />奖励 {scores.reward.total.toFixed(1)}</span>
@@ -493,8 +493,8 @@ export default function App() {
               <Card>
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200">基准分</h3>
-                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">经班级评议合格、书院审定通过</p>
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">基准分</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">经班级评议合格、书院审定通过</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Badge color={basePass ? "emerald" : "red"}>{basePass ? "+70" : "0"}</Badge>
@@ -505,17 +505,17 @@ export default function App() {
 
               <Card>
                 <div className="flex items-center justify-between mb-3 gap-2">
-                  <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200">集体活动分 <Badge color="teal">上限 3</Badge></h3>
-                  <Badge color={collectiveOutstanding ? "emerald" : "stone"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分 <Badge color="teal">上限 3</Badge></h3>
+                  <Badge color={collectiveOutstanding ? "emerald" : "slate"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
                 </div>
                 <Checkbox checked={collectiveOutstanding} onChange={setCollectiveOutstanding} label="对集体荣誉有突出贡献（一次性获满分 3 分）" />
                 {!collectiveOutstanding && (
-                  <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-700">
-                    <div className="flex gap-1 rounded-lg p-0.5 mb-3 bg-stone-100 dark:bg-stone-700">
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex gap-1 rounded-lg p-0.5 mb-3 bg-slate-100 dark:bg-slate-700">
                       {["count", "manual"].map(m => (
                         <button key={m} onClick={() => setCollectiveMode(m)}
                           className={cn("flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all",
-                            collectiveMode === m ? "bg-white text-stone-800 shadow-sm dark:bg-stone-600 dark:text-stone-100" : "text-stone-500 dark:text-stone-400")}>
+                            collectiveMode === m ? "bg-white text-slate-800 shadow-sm dark:bg-slate-600 dark:text-slate-100" : "text-slate-500 dark:text-slate-400")}>
                           {m === "count" ? "按次数计算" : "手动填写"}
                         </button>
                       ))}
@@ -523,14 +523,14 @@ export default function App() {
                     {collectiveMode === "count" ? (
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
-                          <label className="text-sm text-stone-600 dark:text-stone-400">次数</label>
+                          <label className="text-sm text-slate-600 dark:text-slate-400">次数</label>
                           <NumberInput value={collectiveCount} onChange={setCollectiveCount} min={0} max={30} />
-                          <span className="text-xs text-stone-400 dark:text-stone-500">×</span>
-                          <label className="text-sm text-stone-600 dark:text-stone-400">每次</label>
+                          <span className="text-xs text-slate-400 dark:text-slate-500">×</span>
+                          <label className="text-sm text-slate-600 dark:text-slate-400">每次</label>
                           <NumberInput value={collectivePerActivity} onChange={setCollectivePerActivity} min={0.1} max={1} step={0.05} />
-                          <span className="text-xs text-stone-400 dark:text-stone-500">分</span>
+                          <span className="text-xs text-slate-400 dark:text-slate-500">分</span>
                         </div>
-                        <div className="text-xs px-3 py-2 rounded-lg text-stone-500 bg-stone-50 dark:text-stone-400 dark:bg-stone-800/50">
+                        <div className="text-xs px-3 py-2 rounded-lg text-slate-500 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/50">
                           {collectiveCount} × {collectivePerActivity} = {(collectiveCount * collectivePerActivity).toFixed(1)}
                           {collectiveCount * collectivePerActivity > 3 && <span className="text-amber-600 dark:text-amber-400 font-medium ml-2">→ 封顶 3.0</span>}
                         </div>
@@ -538,7 +538,7 @@ export default function App() {
                     ) : (
                       <div className="flex items-center gap-3">
                         <input type="range" min={0} max={3} step={0.1} value={collectiveManual} onChange={e => setCollectiveManual(Number(e.target.value))} className="flex-1 accent-teal-500" />
-                        <span className="font-mono text-sm w-10 text-right font-semibold text-stone-700 dark:text-stone-200">{collectiveManual.toFixed(1)}</span>
+                        <span className="font-mono text-sm w-10 text-right font-semibold text-slate-700 dark:text-slate-200">{collectiveManual.toFixed(1)}</span>
                       </div>
                     )}
                   </div>
@@ -546,7 +546,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">思政学习分 <Badge color="teal">上限 3</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分 <Badge color="teal">上限 3</Badge></h3>
                 <div className="space-y-2.5">
                   <Checkbox checked={politicalStudy.basic} onChange={v => setPoliticalStudy(p => ({ ...p, basic: v }))} label="参加党团组织理论学习培训（含网络学习）(+1)" />
                   <Checkbox checked={politicalStudy.provincial} onChange={v => setPoliticalStudy(p => ({ ...p, provincial: v }))} label="参加省、部级理论学习培训 (+2)" />
@@ -556,11 +556,11 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">社会服务分 <Badge color="teal">上限 4</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分 <Badge color="teal">上限 4</Badge></h3>
                 <Field label="志愿服务时长（小时/学年）" hint="≥32h 得 1 分，不足按比例">
                   <div className="flex items-center gap-3">
                     <NumberInput value={socialService.volunteerHours} onChange={v => setSocialService(p => ({ ...p, volunteerHours: v }))} max={200} />
-                    <span className="text-xs text-stone-500 dark:text-stone-400">→ +{Math.min(1, socialService.volunteerHours / 32).toFixed(2)}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">→ +{Math.min(1, socialService.volunteerHours / 32).toFixed(2)}</span>
                   </div>
                 </Field>
                 <Checkbox checked={socialService.socialPractice} onChange={v => setSocialService(p => ({ ...p, socialPractice: v }))} label="参加校级社会实践，考核合格 (+1)" />
@@ -573,7 +573,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">扣分项 <Badge color="red">不设上限</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项 <Badge color="red">不设上限</Badge></h3>
                 {penalties.map((p, i) => (
                   <DynamicItem key={i} onRemove={() => setPenalties(ps => ps.filter((_, j) => j !== i))} score={-((PENALTY_TYPES[p.type]?.score || 0) * (p.count || 1))}>
                     <div className="flex-1 min-w-[140px]">
@@ -595,8 +595,8 @@ export default function App() {
               <SectionTitle icon="🏆" title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="orange" />
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-1">学科/科技竞赛获奖</h3>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
                 {academicComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))} score={getAcademicCompScore(c)}>
                     <div className="min-w-[120px] flex-1 sm:flex-none sm:w-36">
@@ -614,8 +614,8 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-1">论文 / 专利 / 专著</h3>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">与竞赛合计上限 10 分</p>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
                 {papers.map((p, i) => (
                   <DynamicItem key={i} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))} score={getPaperScore(p)}>
                     <div className="min-w-[120px] flex-1 sm:flex-none sm:w-40">
@@ -634,8 +634,8 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-1">文艺竞赛</h3>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">文体合计上限 6 分</p>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">文体合计上限 6 分</p>
                 {artComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setArtComps(cs => cs.filter((_, j) => j !== i))} score={getArtScore(c)}>
                     <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
@@ -653,7 +653,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-1">体育竞赛</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛</h3>
                 {sportComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setSportComps(cs => cs.filter((_, j) => j !== i))} score={getSportScore(c)}>
                     <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
@@ -675,8 +675,8 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-1">学生组织任职 <Badge color="orange">上限 4</Badge></h3>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">多职务以最高分计，不累加</p>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职 <Badge color="orange">上限 4</Badge></h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">多职务以最高分计，不累加</p>
                 <Field label="最高职务级别">
                   <Select value={orgPosition.level} onChange={v => setOrgPosition(p => ({ ...p, level: Number(v) }))}
                     options={[{ value: -1, label: "未担任职务" }, ...ORG_LEVELS.map((l, i) => ({ value: i, label: l.label }))]} />
@@ -697,7 +697,7 @@ export default function App() {
             <div className="space-y-4">
               <SectionTitle icon="⭐" title="奖励分" subtitle="荣誉表彰 + 好人好事，累加上限 5 分" score={scores.reward.total} maxScore={5} color="amber" />
               <Card>
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-3">荣誉表彰</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">荣誉表彰</h3>
                 {honors.map((h, i) => (
                   <DynamicItem key={i} onRemove={() => setHonors(hs => hs.filter((_, j) => j !== i))} score={HONOR_LEVELS[h.level]?.score || 0}>
                     <div className="w-40">
@@ -712,7 +712,7 @@ export default function App() {
                 <Field label="好人好事 / 突出贡献" hint="每次 +1 分，可累加">
                   <div className="flex items-center gap-3">
                     <NumberInput value={goodDeeds} onChange={setGoodDeeds} min={0} max={10} />
-                    <span className="text-xs text-stone-500 dark:text-stone-400">次 → +{goodDeeds}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">次 → +{goodDeeds}</span>
                   </div>
                 </Field>
               </Card>
@@ -721,29 +721,29 @@ export default function App() {
 
           {/* ═══════ SUMMARY ═══════ */}
           <div className="mt-6">
-            <Card className="border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/60">
-              <h3 className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-3">得分汇总</h3>
+            <Card className="border-slate-300/60 dark:border-slate-600/50 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-800/40">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">得分汇总</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-baseline gap-2">
-                  <span className="text-stone-600 dark:text-stone-400">品行素质分</span>
+                  <span className="text-slate-600 dark:text-slate-400">品行素质分</span>
                   <span className="font-mono font-semibold text-right">
-                    <span className="text-stone-400 dark:text-stone-500 text-xs mr-1 hidden sm:inline">(70+{scores.conduct.collective.toFixed(1)}+{scores.conduct.political.toFixed(1)}+{scores.conduct.social.toFixed(1)}{scores.conduct.penalty > 0 ? `−${scores.conduct.penalty}` : ""})</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs mr-1 hidden sm:inline">(70+{scores.conduct.collective.toFixed(1)}+{scores.conduct.political.toFixed(1)}+{scores.conduct.social.toFixed(1)}{scores.conduct.penalty > 0 ? `−${scores.conduct.penalty}` : ""})</span>
                     <span className="text-teal-600 dark:text-teal-400">{scores.conduct.total.toFixed(1)}</span>
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline gap-2">
-                  <span className="text-stone-600 dark:text-stone-400">能力拓展分</span>
+                  <span className="text-slate-600 dark:text-slate-400">能力拓展分</span>
                   <span className="font-mono font-semibold text-right">
-                    <span className="text-stone-400 dark:text-stone-500 text-xs mr-1 hidden sm:inline">({scores.ability.academic.toFixed(1)}+{scores.ability.artSport.toFixed(1)}+{scores.ability.org.toFixed(1)})</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs mr-1 hidden sm:inline">({scores.ability.academic.toFixed(1)}+{scores.ability.artSport.toFixed(1)}+{scores.ability.org.toFixed(1)})</span>
                     <span className="text-orange-600 dark:text-orange-400">{scores.ability.total.toFixed(1)}</span>
                   </span>
                 </div>
-                <div className="flex justify-between"><span className="text-stone-600 dark:text-stone-400">奖励分</span>
+                <div className="flex justify-between"><span className="text-slate-600 dark:text-slate-400">奖励分</span>
                   <span className="font-mono font-semibold text-amber-600 dark:text-amber-400">{scores.reward.total.toFixed(1)}</span>
                 </div>
-                <div className="border-t pt-2 flex justify-between border-stone-200 dark:border-stone-600">
-                  <span className="font-semibold text-stone-800 dark:text-stone-100">总分</span>
-                  <span className="font-mono text-lg font-bold text-stone-800 dark:text-stone-100">{scores.total.toFixed(1)}</span>
+                <div className="border-t pt-2 flex justify-between border-slate-200 dark:border-slate-600">
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">总分</span>
+                  <span className="font-mono text-lg font-bold text-slate-800 dark:text-slate-100">{scores.total.toFixed(1)}</span>
                 </div>
               </div>
             </Card>
@@ -751,12 +751,12 @@ export default function App() {
 
           <div className="mt-4 flex justify-center">
             <button onClick={() => setShowExport(true)}
-              className="flex items-center gap-2 py-2 px-5 rounded-xl text-sm font-medium transition bg-stone-800 text-white hover:bg-stone-700 dark:bg-stone-200 dark:text-stone-800 dark:hover:bg-stone-300 active:scale-[0.98]">
+              className="flex items-center gap-2 py-2.5 px-6 rounded-xl text-sm font-medium transition-all bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md shadow-teal-500/20 dark:shadow-teal-500/10 active:scale-[0.97]">
               <IconShare />导出得分报告
             </button>
           </div>
 
-          <p className="text-center text-xs mt-5 mb-4 text-stone-400 dark:text-stone-500">
+          <p className="text-center text-xs mt-5 mb-4 text-slate-400 dark:text-slate-500">
             仅供参考，最终以学校/书院官方认定为准
           </p>
         </div>
