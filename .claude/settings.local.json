@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find D:/XJTU/课程/算法设计与分析/德育分计算项目 -type f -name *)",
+      "Bash(pandoc \"D:/XJTU/资料/附件1：本科生专业选择综合素质测评内容及评分标准\\(1\\).docx\" -t plain --wrap=none)",
+      "Bash(pandoc \"D:/XJTU/资料/西安交通大学鼓励学生参加学科科技竞赛实施办法.doc\" -t plain --wrap=none)",
+      "Bash(pip show:*)",
+      "Bash(python -c \":*)",
+      "Bash(pip install:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm create:*)",
+      "Bash(cp vite-temp/package.json vite-temp/vite.config.js vite-temp/index.html vite-temp/eslint.config.js \"德育分计算项目/\")",
+      "Bash(cp -r vite-temp/src vite-temp/public \"德育分计算项目/\")",
+      "Bash(npm install:*)",
+      "Bash(cp xjtu-deyu-calculator.jsx src/App.jsx)",
+      "Bash(rm -f src/App.css src/assets/react.svg public/vite.svg)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
