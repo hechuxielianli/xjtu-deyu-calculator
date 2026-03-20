@@ -594,44 +594,47 @@ export default function App() {
             <div className="space-y-4">
               <SectionTitle icon="🏆" title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="orange" />
 
-              <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
-                {academicComps.map((c, i) => (
-                  <DynamicItem key={i} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))} score={getAcademicCompScore(c)}>
-                    <div className="min-w-[120px] flex-1 sm:flex-none sm:w-36">
-                      <Select value={c.level} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
-                        options={Object.entries(ACADEMIC_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
-                    </div>
-                    <div className="w-24 sm:w-28">
-                      <Select value={c.award} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, award: v } : cc))}
-                        options={[{ value: "special", label: "特等奖" }, { value: "first", label: "一等奖" }, { value: "second", label: "二等奖" }, { value: "third", label: "三等奖" },
-                          ...(c.level === "school" ? [{ value: "excellence", label: "优秀奖" }] : [])]} />
-                    </div>
-                  </DynamicItem>
-                ))}
-                <AddButton onClick={() => setAcademicComps(cs => [...cs, { level: "national", award: "first" }])} label="添加竞赛获奖" />
-              </Card>
+              <div className="rounded-2xl border border-orange-200/60 bg-orange-50/40 dark:border-orange-800/40 dark:bg-orange-950/20 p-2 sm:p-3 space-y-3">
+                <Card>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖</h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
+                  {academicComps.map((c, i) => (
+                    <DynamicItem key={i} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))} score={getAcademicCompScore(c)}>
+                      <div className="min-w-[120px] flex-1 sm:flex-none sm:w-36">
+                        <Select value={c.level} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
+                          options={Object.entries(ACADEMIC_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
+                      </div>
+                      <div className="w-24 sm:w-28">
+                        <Select value={c.award} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, award: v } : cc))}
+                          options={[{ value: "special", label: "特等奖" }, { value: "first", label: "一等奖" }, { value: "second", label: "二等奖" }, { value: "third", label: "三等奖" },
+                            ...(c.level === "school" ? [{ value: "excellence", label: "优秀奖" }] : [])]} />
+                      </div>
+                    </DynamicItem>
+                  ))}
+                  <AddButton onClick={() => setAcademicComps(cs => [...cs, { level: "national", award: "first" }])} label="添加竞赛获奖" />
+                </Card>
 
-              <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
-                {papers.map((p, i) => (
-                  <DynamicItem key={i} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))} score={getPaperScore(p)}>
-                    <div className="min-w-[120px] flex-1 sm:flex-none sm:w-40">
-                      <Select value={p.type} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, type: v } : pp))}
-                        options={Object.entries(PAPER_SCORES).map(([k, v]) => ({ value: k, label: v.label }))} />
-                    </div>
-                    <div className="w-24">
-                      <Select value={p.authorRank} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, authorRank: Number(v) } : pp))}
-                        options={[1,2,3,4,5,6].map(n => ({ value: n, label: `第${n}作者` }))} />
-                    </div>
-                    <Checkbox checked={p.outstandingPaper || false} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, outstandingPaper: v } : pp))} label="优秀论文" />
-                  </DynamicItem>
-                ))}
-                <AddButton onClick={() => setPapers(ps => [...ps, { type: "intl_journal", authorRank: 1, outstandingPaper: false }])} label="添加论文/专利" />
-                <div className="mt-2 text-right"><Badge color="orange">学术: {scores.ability.academic.toFixed(1)}/10</Badge></div>
-              </Card>
+                <Card>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著</h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
+                  {papers.map((p, i) => (
+                    <DynamicItem key={i} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))} score={getPaperScore(p)}>
+                      <div className="min-w-[120px] flex-1 sm:flex-none sm:w-40">
+                        <Select value={p.type} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, type: v } : pp))}
+                          options={Object.entries(PAPER_SCORES).map(([k, v]) => ({ value: k, label: v.label }))} />
+                      </div>
+                      <div className="w-24">
+                        <Select value={p.authorRank} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, authorRank: Number(v) } : pp))}
+                          options={[1,2,3,4,5,6].map(n => ({ value: n, label: `第${n}作者` }))} />
+                      </div>
+                      <Checkbox checked={p.outstandingPaper || false} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, outstandingPaper: v } : pp))} label="优秀论文" />
+                    </DynamicItem>
+                  ))}
+                  <AddButton onClick={() => setPapers(ps => [...ps, { type: "intl_journal", authorRank: 1, outstandingPaper: false }])} label="添加论文/专利" />
+                </Card>
+
+                <div className="mt-1 pr-2 text-right"><Badge color="orange">学术: {scores.ability.academic.toFixed(1)}/10</Badge></div>
+              </div>
 
               <Card>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛</h3>
@@ -650,9 +653,9 @@ export default function App() {
                   </DynamicItem>
                 ))}
                 <AddButton onClick={() => setArtComps(cs => [...cs, { level: "national", award: "first" }])} label="添加文艺获奖" />
-              </Card>
 
-              <Card>
+                <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
+
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛</h3>
                 {sportComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setSportComps(cs => cs.filter((_, j) => j !== i))} score={getSportScore(c)}>
