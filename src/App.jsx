@@ -184,6 +184,126 @@ function TabNav({ active, onChange, tabs }) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  TOOLTIP COMPONENT
+// ═══════════════════════════════════════════════════════════
+
+function RuleTooltip({ content }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, [open]);
+
+  return (
+    <span ref={ref} className="relative inline-flex items-center align-middle">
+      <button
+        onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
+        onClick={(e) => { e.preventDefault(); setOpen(o => !o); }}
+        className="ml-1.5 w-4 h-4 rounded-full inline-flex items-center justify-center text-[10px] font-bold leading-none text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition cursor-help"
+        aria-label="评分规则">?</button>
+      {open && (
+        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 sm:w-80 p-3 rounded-xl shadow-lg border text-xs leading-relaxed max-h-64 overflow-y-auto bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300">
+          {content}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-2 h-2 rotate-45 bg-white border-b border-r border-slate-200 dark:bg-slate-800 dark:border-slate-600" />
+        </div>
+      )}
+    </span>
+  );
+}
+
+function RuleTable({ headers, rows }) {
+  return (
+    <table className="w-full text-xs mt-1.5">
+      <thead><tr className="border-b border-slate-200 dark:border-slate-600">{headers.map((h, i) => <th key={i} className={cn("py-1", i === 0 ? "text-left" : "text-center")}>{h}</th>)}</tr></thead>
+      <tbody>{rows.map((row, i) => <tr key={i} className="border-b border-slate-100 dark:border-slate-700">{row.map((cell, j) => <td key={j} className={cn("py-1", j === 0 ? "text-left" : "text-center")}>{cell}</td>)}</tr>)}</tbody>
+    </table>
+  );
+}
+
+// ── Tooltip content for each scoring section ──
+
+const TOOLTIP_BASE = <div><p className="font-semibold mb-1">基准分（70分）</p><p>合格即得70分。未通过基准考核则为0分。</p></div>;
+
+const TOOLTIP_COLLECTIVE = <div><p className="font-semibold mb-1">集体活动分（0~3分）</p><p>每参加一次学校/书院集体活动得0.1~0.5分，累计上限3分。被评为集体活动优秀个人直接得3分。</p></div>;
+
+const TOOLTIP_POLITICAL = <div><p className="font-semibold mb-1">思政学习分（0~3分）</p><p>完成基本学习任务+1；省级及以上竞赛获奖+2；被评为优秀+1。累计上限3分。</p></div>;
+
+const TOOLTIP_SOCIAL = <div><p className="font-semibold mb-1">社会服务分（0~4分）</p><p>志愿服务≥32h得1分（按比例）；社会实践合格+1；实习市级+1/省级+2；先进个人+1。上限4分。</p></div>;
+
+const TOOLTIP_PENALTY = (<div><p className="font-semibold mb-1">扣分项</p>
+  <RuleTable headers={["类型", "扣分"]} rows={PENALTY_TYPES.map(p => [p.label, p.score])} /></div>);
+
+const TOOLTIP_ACADEMIC = (<div><p className="font-semibold mb-1">学科/科技竞赛（上限10分）</p><p className="mb-1">同一项目取最高奖，不同项目累加。特等奖按一等奖计。</p>
+  <RuleTable headers={["级别", "一等", "二等", "三等"]} rows={Object.values(ACADEMIC_COMP).map(r => [r.label, r.first, r.second, r.third])} /></div>);
+
+const TOOLTIP_PAPER = (<div><p className="font-semibold mb-1">论文/专利/专著</p><p className="mb-1">与竞赛合计上限10分。按作者排名(1~4+)递减。</p>
+  <RuleTable headers={["类型", "第1", "第2", "第3", "第4+"]} rows={Object.values(PAPER_SCORES).map(r => [r.label, ...r.scores])} /></div>);
+
+const TOOLTIP_ART = (<div><p className="font-semibold mb-1">文艺竞赛评分标准</p>
+  <RuleTable headers={["级别", "一等", "二等", "三等", "优秀"]} rows={Object.values(ART_COMP).map(r => [r.label, r.first, r.second, r.third, r.excellence || "-"])} /></div>);
+
+const TOOLTIP_SPORT = (<div><p className="font-semibold mb-1">体育竞赛评分标准</p><p className="mb-1">破省级及以上纪录+5，破校纪录+3。</p>
+  <RuleTable headers={["级别", "第1", "第2", "第3", "4~8名"]} rows={Object.values(SPORT_COMP).map(r => [r.label, r.r1, r.r2, r.r3, r.r48])} /></div>);
+
+const TOOLTIP_ORG = (<div><p className="font-semibold mb-1">组织任职评分（上限4分）</p><p className="mb-1">多职务取最高分，不累加。</p>
+  <RuleTable headers={["级别", "优", "良", "合格"]} rows={ORG_LEVELS.map(l => [l.label.split("（")[0], l.scores.excellent, l.scores.good, l.scores.pass])} /></div>);
+
+const TOOLTIP_HONOR = (<div><p className="font-semibold mb-1">荣誉表彰评分</p>
+  <RuleTable headers={["级别", "得分"]} rows={HONOR_LEVELS.map(l => [l.label, l.score])} /></div>);
+
+const TOOLTIP_DEEDS = <div><p className="font-semibold mb-1">好人好事加分（0~5分）</p><p>视具体情况由学校/书院认定，每次0.5~5分。</p></div>;
+
+// ═══════════════════════════════════════════════════════════
+//  SCORE DISTRIBUTION CHART
+// ═══════════════════════════════════════════════════════════
+
+function ScoreChart({ scores }) {
+  const modules = [
+    { label: "品行素质", score: scores.conduct.total, max: 80, color: "teal",
+      subs: [{ l: "基准", v: scores.conduct.base }, { l: "集体", v: scores.conduct.collective }, { l: "思政", v: scores.conduct.political }, { l: "服务", v: scores.conduct.social }, ...(scores.conduct.penalty > 0 ? [{ l: "扣分", v: -scores.conduct.penalty }] : [])] },
+    { label: "能力拓展", score: scores.ability.total, max: 20, color: "orange",
+      subs: [{ l: "学术", v: scores.ability.academic }, { l: "文体", v: scores.ability.artSport }, { l: "任职", v: scores.ability.org }] },
+    { label: "奖励分", score: scores.reward.total, max: 5, color: "amber",
+      subs: [{ l: "荣誉", v: scores.reward.honor }, { l: "好事", v: scores.reward.deeds }] },
+  ];
+  const colors = {
+    teal: { bar: "bg-teal-500 dark:bg-teal-400", text: "text-teal-600 dark:text-teal-400" },
+    orange: { bar: "bg-orange-500 dark:bg-orange-400", text: "text-orange-600 dark:text-orange-400" },
+    amber: { bar: "bg-amber-500 dark:bg-amber-400", text: "text-amber-600 dark:text-amber-400" },
+  };
+  return (
+    <div className="space-y-3 my-3">
+      {modules.map(m => {
+        const pct = m.max > 0 ? (m.score / m.max) * 100 : 0;
+        const c = colors[m.color];
+        return (
+          <div key={m.label}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={cn("text-xs font-semibold", c.text)}>{m.label}</span>
+              <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">{m.score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{m.max}</span></span>
+            </div>
+            <div className="h-3 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+              <div className={cn("h-full rounded-full transition-all duration-500", c.bar)} style={{ width: `${Math.min(100, pct)}%` }} />
+            </div>
+            <div className="flex gap-2 mt-1 flex-wrap">
+              {m.subs.map(s => (
+                <span key={s.l} className="text-[10px] text-slate-400 dark:text-slate-500">
+                  {s.l} <span className={cn("font-mono", s.v < 0 ? "text-red-500" : "text-slate-500 dark:text-slate-400")}>{s.v >= 0 ? "+" : ""}{s.v.toFixed(1)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 //  CANVAS EXPORT
 // ═══════════════════════════════════════════════════════════
 
@@ -336,6 +456,31 @@ function ExportModal({ scores, isDark, onClose }) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  LOCAL STORAGE PERSISTENCE
+// ═══════════════════════════════════════════════════════════
+
+const STORAGE_KEY = "xjtu-deyu-data";
+const STORAGE_VERSION = 1;
+const DEFAULT_STATE = {
+  basePass: true, collectiveMode: "count", collectiveCount: 0, collectivePerActivity: 0.3,
+  collectiveManual: 0, collectiveOutstanding: false,
+  politicalStudy: { basic: false, provincial: false, outstanding: false },
+  socialService: { volunteerHours: 0, socialPractice: false, internLevel: "none", advancedIndividual: false },
+  penalties: [], academicComps: [], papers: [], artComps: [], sportComps: [],
+  recordBreak: "none", orgPosition: { level: -1, rating: "none" }, honors: [], goodDeeds: 0,
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_STATE;
+    const parsed = JSON.parse(raw);
+    if (parsed.version === STORAGE_VERSION) return { ...DEFAULT_STATE, ...parsed.data };
+    return DEFAULT_STATE;
+  } catch { return DEFAULT_STATE; }
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN APPLICATION
 // ═══════════════════════════════════════════════════════════
 
@@ -346,24 +491,39 @@ export default function App() {
 
   useEffect(() => { if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) setDark(true); }, []);
 
-  // ── State ──
-  const [basePass, setBasePass] = useState(true);
-  const [collectiveMode, setCollectiveMode] = useState("count");
-  const [collectiveCount, setCollectiveCount] = useState(0);
-  const [collectivePerActivity, setCollectivePerActivity] = useState(0.3);
-  const [collectiveManual, setCollectiveManual] = useState(0);
-  const [collectiveOutstanding, setCollectiveOutstanding] = useState(false);
-  const [politicalStudy, setPoliticalStudy] = useState({ basic: false, provincial: false, outstanding: false });
-  const [socialService, setSocialService] = useState({ volunteerHours: 0, socialPractice: false, internLevel: "none", advancedIndividual: false });
-  const [penalties, setPenalties] = useState([]);
-  const [academicComps, setAcademicComps] = useState([]);
-  const [papers, setPapers] = useState([]);
-  const [artComps, setArtComps] = useState([]);
-  const [sportComps, setSportComps] = useState([]);
-  const [recordBreak, setRecordBreak] = useState("none");
-  const [orgPosition, setOrgPosition] = useState({ level: -1, rating: "none" });
-  const [honors, setHonors] = useState([]);
-  const [goodDeeds, setGoodDeeds] = useState(0);
+  // ── State (restored from localStorage) ──
+  const [initialState] = useState(() => loadState());
+  const [basePass, setBasePass] = useState(initialState.basePass);
+  const [collectiveMode, setCollectiveMode] = useState(initialState.collectiveMode);
+  const [collectiveCount, setCollectiveCount] = useState(initialState.collectiveCount);
+  const [collectivePerActivity, setCollectivePerActivity] = useState(initialState.collectivePerActivity);
+  const [collectiveManual, setCollectiveManual] = useState(initialState.collectiveManual);
+  const [collectiveOutstanding, setCollectiveOutstanding] = useState(initialState.collectiveOutstanding);
+  const [politicalStudy, setPoliticalStudy] = useState(initialState.politicalStudy);
+  const [socialService, setSocialService] = useState(initialState.socialService);
+  const [penalties, setPenalties] = useState(initialState.penalties);
+  const [academicComps, setAcademicComps] = useState(initialState.academicComps);
+  const [papers, setPapers] = useState(initialState.papers);
+  const [artComps, setArtComps] = useState(initialState.artComps);
+  const [sportComps, setSportComps] = useState(initialState.sportComps);
+  const [recordBreak, setRecordBreak] = useState(initialState.recordBreak);
+  const [orgPosition, setOrgPosition] = useState(initialState.orgPosition);
+  const [honors, setHonors] = useState(initialState.honors);
+  const [goodDeeds, setGoodDeeds] = useState(initialState.goodDeeds);
+
+  // ── Auto-save to localStorage ──
+  useEffect(() => {
+    const data = {
+      basePass, collectiveMode, collectiveCount, collectivePerActivity,
+      collectiveManual, collectiveOutstanding, politicalStudy, socialService,
+      penalties, academicComps, papers, artComps, sportComps,
+      recordBreak, orgPosition, honors, goodDeeds,
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, data })); } catch {}
+  }, [basePass, collectiveMode, collectiveCount, collectivePerActivity,
+    collectiveManual, collectiveOutstanding, politicalStudy, socialService,
+    penalties, academicComps, papers, artComps, sportComps,
+    recordBreak, orgPosition, honors, goodDeeds]);
 
   // ═══════════════════════════════════════════════════════════
   //  SCORE CALCULATIONS
@@ -493,7 +653,7 @@ export default function App() {
               <Card>
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">基准分</h3>
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">基准分<RuleTooltip content={TOOLTIP_BASE} /></h3>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">经班级评议合格、书院审定通过</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -505,7 +665,7 @@ export default function App() {
 
               <Card>
                 <div className="flex items-center justify-between mb-3 gap-2">
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分 <Badge color="teal">上限 3</Badge></h3>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分<RuleTooltip content={TOOLTIP_COLLECTIVE} /> <Badge color="teal">上限 3</Badge></h3>
                   <Badge color={collectiveOutstanding ? "emerald" : "slate"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
                 </div>
                 <Checkbox checked={collectiveOutstanding} onChange={setCollectiveOutstanding} label="对集体荣誉有突出贡献（一次性获满分 3 分）" />
@@ -546,7 +706,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分 <Badge color="teal">上限 3</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分<RuleTooltip content={TOOLTIP_POLITICAL} /> <Badge color="teal">上限 3</Badge></h3>
                 <div className="space-y-2.5">
                   <Checkbox checked={politicalStudy.basic} onChange={v => setPoliticalStudy(p => ({ ...p, basic: v }))} label="参加党团组织理论学习培训（含网络学习）(+1)" />
                   <Checkbox checked={politicalStudy.provincial} onChange={v => setPoliticalStudy(p => ({ ...p, provincial: v }))} label="参加省、部级理论学习培训 (+2)" />
@@ -556,7 +716,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分 <Badge color="teal">上限 4</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分<RuleTooltip content={TOOLTIP_SOCIAL} /> <Badge color="teal">上限 4</Badge></h3>
                 <Field label="志愿服务时长（小时/学年）" hint="≥32h 得 1 分，不足按比例">
                   <div className="flex items-center gap-3">
                     <NumberInput value={socialService.volunteerHours} onChange={v => setSocialService(p => ({ ...p, volunteerHours: v }))} max={200} />
@@ -573,7 +733,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项 <Badge color="red">不设上限</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项<RuleTooltip content={TOOLTIP_PENALTY} /> <Badge color="red">不设上限</Badge></h3>
                 {penalties.map((p, i) => (
                   <DynamicItem key={i} onRemove={() => setPenalties(ps => ps.filter((_, j) => j !== i))} score={-((PENALTY_TYPES[p.type]?.score || 0) * (p.count || 1))}>
                     <div className="flex-1 min-w-[140px]">
@@ -596,7 +756,7 @@ export default function App() {
 
               <div className="rounded-2xl border border-orange-200/60 bg-orange-50/40 dark:border-orange-800/40 dark:bg-orange-950/20 p-2 sm:p-3 space-y-3">
                 <Card>
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖</h3>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖<RuleTooltip content={TOOLTIP_ACADEMIC} /></h3>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
                   {academicComps.map((c, i) => (
                     <DynamicItem key={i} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))} score={getAcademicCompScore(c)}>
@@ -615,7 +775,7 @@ export default function App() {
                 </Card>
 
                 <Card>
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著</h3>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著<RuleTooltip content={TOOLTIP_PAPER} /></h3>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
                   {papers.map((p, i) => (
                     <DynamicItem key={i} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))} score={getPaperScore(p)}>
@@ -637,7 +797,7 @@ export default function App() {
               </div>
 
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛<RuleTooltip content={TOOLTIP_ART} /></h3>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">文体合计上限 6 分</p>
                 {artComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setArtComps(cs => cs.filter((_, j) => j !== i))} score={getArtScore(c)}>
@@ -656,7 +816,7 @@ export default function App() {
 
                 <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
 
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛<RuleTooltip content={TOOLTIP_SPORT} /></h3>
                 {sportComps.map((c, i) => (
                   <DynamicItem key={i} onRemove={() => setSportComps(cs => cs.filter((_, j) => j !== i))} score={getSportScore(c)}>
                     <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
@@ -678,7 +838,7 @@ export default function App() {
               </Card>
 
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职 <Badge color="orange">上限 4</Badge></h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="orange">上限 4</Badge></h3>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">多职务以最高分计，不累加</p>
                 <Field label="最高职务级别">
                   <Select value={orgPosition.level} onChange={v => setOrgPosition(p => ({ ...p, level: Number(v) }))}
@@ -700,7 +860,7 @@ export default function App() {
             <div className="space-y-4">
               <SectionTitle icon="⭐" title="奖励分" subtitle="荣誉表彰 + 好人好事，累加上限 5 分" score={scores.reward.total} maxScore={5} color="amber" />
               <Card>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">荣誉表彰</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">荣誉表彰<RuleTooltip content={TOOLTIP_HONOR} /></h3>
                 {honors.map((h, i) => (
                   <DynamicItem key={i} onRemove={() => setHonors(hs => hs.filter((_, j) => j !== i))} score={HONOR_LEVELS[h.level]?.score || 0}>
                     <div className="w-40">
@@ -725,7 +885,8 @@ export default function App() {
           {/* ═══════ SUMMARY ═══════ */}
           <div className="mt-6">
             <Card className="border-slate-300/60 dark:border-slate-600/50 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-800/40">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">得分汇总</h3>
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">得分汇总</h3>
+              <ScoreChart scores={scores} />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-baseline gap-2">
                   <span className="text-slate-600 dark:text-slate-400">品行素质分</span>
