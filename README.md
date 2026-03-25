@@ -7,10 +7,14 @@
 - **三大评分模块**：品行素质分（80）+ 能力拓展分（20）+ 奖励分（5）= 满分 105
 - **实时计算**：所有输入即时反映到总分，自动处理上限封顶逻辑
 - **丰富的评分项**：涵盖基准分、集体活动、思政学习、社会服务、学术科研、文体竞赛、组织任职、荣誉表彰等全部评分维度
-- **动态条目管理**：竞赛获奖、论文专利、荣誉表彰等均支持多条添加/删除
-- **导出功能**：一键生成精美评分报告图片（PNG），支持打印 / 导出 PDF
+- **动态条目管理**：竞赛获奖、论文专利、荣誉表彰等均支持多条添加/删除，支持上下移动排序，超过 3 条自动折叠
+- **数据持久化**：自动保存填写进度到 localStorage，刷新页面不丢失
+- **评分规则提示**：每个评分项旁的 `?` 图标，hover/点击查看详细评分标准
+- **得分可视化**：三大模块的水平条形图，直观展示各项得分和提升空间
+- **导出功能**：一键生成精美评分报告图片（PNG），含学校 Logo、时间戳、印章水印，支持打印 / 导出 PDF
 - **深色模式**：自动跟随系统偏好，支持手动切换
 - **响应式设计**：完美适配手机和桌面端
+- **SEO 优化**：Open Graph / Twitter Card 标签，微信/QQ 分享预览卡片
 
 ## 技术栈
 
@@ -75,9 +79,26 @@ npm run build
 
 ```
 src/
-├── App.jsx       # 主应用组件（数据定义、评分逻辑、UI 渲染、图片导出）
-├── index.css     # Tailwind CSS 入口 + 自定义样式
-└── main.jsx      # React 应用入口
+├── App.jsx                        # 主组件（状态管理 + 布局组合，~120 行）
+├── index.css                      # Tailwind CSS 入口 + 自定义样式
+├── main.jsx                       # React 应用入口
+├── data/
+│   └── constants.js               # 评分数据表 + localStorage 常量
+├── components/
+│   ├── icons.jsx                  # SVG 图标组件
+│   ├── ui.jsx                     # 通用 UI 组件（Card, Badge, Select 等）
+│   ├── RuleTooltip.jsx            # 评分规则提示组件 + 内容
+│   ├── ScoreChart.jsx             # 得分分布条形图
+│   ├── CollapsibleList.jsx        # 可折叠列表 + 排序工具
+│   ├── ExportModal.jsx            # 导出弹窗 + Canvas 绘制
+│   ├── ScoreSummary.jsx           # 得分汇总卡片
+│   └── tabs/
+│       ├── ConductTab.jsx         # 品行素质 tab
+│       ├── AbilityTab.jsx         # 能力拓展 tab
+│       └── RewardTab.jsx          # 奖励分 tab
+└── hooks/
+    ├── useScoreCalculator.js      # 评分计算逻辑
+    └── useLocalStorage.js         # 本地数据持久化
 ```
 
 ## 免责声明
