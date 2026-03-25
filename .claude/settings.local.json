@@ -14,7 +14,8 @@
       "Bash(npm install:*)",
       "Bash(cp xjtu-deyu-calculator.jsx src/App.jsx)",
       "Bash(rm -f src/App.css src/assets/react.svg public/vite.svg)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx vite:*)"
     ]
   }
 }
