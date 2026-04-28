@@ -77,7 +77,7 @@ npm run build
 5. Netlify 会自动识别配置，直接点击 "Deploy"
 6. 每次 `git push` 自动触发重新构建
 
-**在线访问：** 部署后会获得 `*.netlify.app` 域名
+**在线访问：** https://xjtu-deyu-calculator.netlify.app
 
 ## 项目结构
 
