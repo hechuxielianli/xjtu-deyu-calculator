@@ -68,12 +68,14 @@ npm run build
 
 ## 部署
 
-本项目推荐使用 [Vercel](https://vercel.com) 部署：
+本项目使用 [Cloudflare Pages](https://pages.cloudflare.com) 部署（国内访问友好）：
 
 1. 将代码推送到 GitHub
-2. 在 Vercel 中导入该仓库
-3. Vercel 自动识别 Vite 项目，零配置直接部署
+2. 在 Cloudflare Pages 中连接该仓库
+3. 配置构建命令：`npm run build`，输出目录：`dist`
 4. 每次 `git push` 自动触发重新构建
+
+**在线访问：** https://xjtu-deyu-calculator.pages.dev
 
 ## 项目结构
 
