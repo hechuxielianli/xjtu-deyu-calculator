@@ -68,14 +68,16 @@ npm run build
 
 ## 部署
 
-本项目使用 [Cloudflare Pages](https://pages.cloudflare.com) 部署（国内访问友好）：
+本项目使用 [Netlify](https://www.netlify.com) 部署（国内访问友好）：
 
 1. 将代码推送到 GitHub
-2. 在 Cloudflare Pages 中连接该仓库
-3. 配置构建命令：`npm run build`，输出目录：`dist`
-4. 每次 `git push` 自动触发重新构建
+2. 访问 https://app.netlify.com 并登录（可用 GitHub 账号）
+3. 点击 "Add new site" → "Import an existing project"
+4. 选择 GitHub，授权并选择仓库 `xjtu-deyu-calculator`
+5. Netlify 会自动识别配置，直接点击 "Deploy"
+6. 每次 `git push` 自动触发重新构建
 
-**在线访问：** https://xjtu-deyu-calculator.pages.dev
+**在线访问：** 部署后会获得 `*.netlify.app` 域名
 
 ## 项目结构
 
