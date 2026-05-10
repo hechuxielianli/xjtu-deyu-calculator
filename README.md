@@ -2,6 +2,10 @@
 
 > 基于 React 的西安交通大学本科生综合素质测评得分计算工具，依据《本科生专业选择综合素质测评内容及评分标准》。
 
+**🔗 在线 Demo：** https://xjtu-deyu-calculator.netlify.app
+**📖 算法说明：** [docs/ALGORITHM.md](docs/ALGORITHM.md)
+**📝 实验报告：** [实验报告.md](实验报告.md)
+
 ## 功能特点
 
 - **三大评分模块**：品行素质分（80）+ 能力拓展分（20）+ 奖励分（5）= 满分 105
@@ -29,7 +33,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/xjtu-deyu-calculator.git
+git clone https://github.com/hechuxielianli/xjtu-deyu-calculator.git
 cd xjtu-deyu-calculator
 
 # 安装依赖
