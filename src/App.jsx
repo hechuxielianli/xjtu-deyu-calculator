@@ -4,6 +4,7 @@ import { IconSun, IconMoon, IconShare } from "./components/icons";
 import { ConductTab } from "./components/tabs/ConductTab";
 import { AbilityTab } from "./components/tabs/AbilityTab";
 import { RewardTab } from "./components/tabs/RewardTab";
+import { RecommenderTab } from "./components/tabs/RecommenderTab";
 import { ScoreSummary } from "./components/ScoreSummary";
 import { ExportModal } from "./components/ExportModal";
 import { useScoreCalculator } from "./hooks/useScoreCalculator";
@@ -87,6 +88,7 @@ export default function App() {
             { key: "conduct", icon: "🎯", label: "品行素质" },
             { key: "ability", icon: "🏆", label: "能力拓展" },
             { key: "reward", icon: "⭐", label: "奖励分" },
+            { key: "recommender", icon: "🧮", label: "目标推荐" },
           ]} />
 
           {tab === "conduct" && (
@@ -117,6 +119,8 @@ export default function App() {
               honors={honors} setHonors={setHonors}
               goodDeeds={goodDeeds} setGoodDeeds={setGoodDeeds} />
           )}
+
+          {tab === "recommender" && <RecommenderTab scores={scores} />}
 
           <ScoreSummary scores={scores} onExport={() => setShowExport(true)} />
         </div>
