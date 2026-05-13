@@ -141,5 +141,21 @@ console.log("\n=== Test 10: 复杂度信息 ===");
   console.log(`  Greedy 复杂度：${info.greedy}`);
 }
 
+console.log("\n=== Test 11: 候选项必须带 difficulty 字段 ===");
+{
+  const allowed = new Set(["normal", "hard", "very-hard"]);
+  const missing = CANDIDATES.filter(c => !allowed.has(c.difficulty));
+  assert(missing.length === 0, `全部 ${CANDIDATES.length} 项 difficulty ∈ {normal, hard, very-hard}（缺失/非法：${missing.length}）`);
+}
+
+console.log("\n=== Test 12: 空候选池返回 infeasible 不崩 ===");
+{
+  const scores = makeScores(70, 0, 0, 0, 0);
+  const r = recommend(scores, 80, []);
+  assert(r.feasible === false, "feasible = false");
+  assert(typeof r.gap === "number", "返回 gap 字段");
+  assert(Array.isArray(r.selected), "返回 selected 数组");
+}
+
 console.log(`\n=== 总计 ${passed + failed} 项断言：${passed} 通过，${failed} 失败 ===`);
 if (failed > 0) process.exit(1);
