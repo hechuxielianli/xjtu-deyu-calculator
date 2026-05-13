@@ -19,3 +19,18 @@ export function usePersistState(state) {
     state.penalties, state.academicComps, state.papers, state.artComps, state.sportComps,
     state.recordBreak, state.orgPosition, state.honors, state.goodDeeds]);
 }
+
+const EXCLUDED_KEY = "deyu_recommender_excluded_v1";
+
+export function loadExcluded() {
+  try {
+    const raw = localStorage.getItem(EXCLUDED_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch { return new Set(); }
+}
+
+export function saveExcluded(set) {
+  try { localStorage.setItem(EXCLUDED_KEY, JSON.stringify([...set])); } catch {}
+}
