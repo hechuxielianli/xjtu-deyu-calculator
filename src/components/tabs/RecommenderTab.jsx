@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
-import { Card, Badge, SectionTitle, Field } from "../ui";
-import { compareAlgorithms, complexityInfo, CANDIDATES } from "../../algorithms/recommender";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Card, Badge, SectionTitle } from "../ui";
+import { IconX } from "../icons";
+import { recommend, CANDIDATES } from "../../algorithms/recommender";
+import { loadExcluded, saveExcluded } from "../../hooks/useLocalStorage";
 
 const MODULE_META = {
   conduct: { label: "品行素质", color: "teal" },
@@ -10,49 +12,34 @@ const MODULE_META = {
   reward: { label: "奖励分", color: "amber" },
 };
 
+const VERY_HARD_HINT = "破纪录、国家级奖项、省级以上荣誉等";
+
 function formatCost(hours) {
   if (hours === Infinity) return "—";
   if (hours >= 100) return `${hours} 小时（≈${(hours / 8).toFixed(1)} 工作日）`;
   return `${hours} 小时`;
 }
 
-function ResultCard({ title, result, badge }) {
-  if (!result) return null;
-  if (!result.feasible) {
-    return (
-      <Card className="border-red-300 dark:border-red-700">
-        <div className="flex items-center gap-2 mb-2">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
-          <Badge color="red">不可行</Badge>
-        </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">现有候选项无法达到目标分（候选库覆盖范围受限）。</p>
-      </Card>
-    );
+function runRecommend(scores, target, excludedIds, includeHard) {
+  const filtered = CANDIDATES.filter(c =>
+    !excludedIds.has(c.id) && (includeHard || c.difficulty !== "very-hard")
+  );
+  const result = recommend(scores, target, filtered);
+  let relaxed = null;
+  if (!result.feasible && !includeHard) {
+    const r = recommend(scores, target, CANDIDATES.filter(c => !excludedIds.has(c.id)));
+    if (r.feasible) relaxed = r;
   }
-  if (result.selected.length === 0) {
-    return (
-      <Card>
-        <div className="flex items-center gap-2 mb-2">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
-          <Badge color="emerald">已达标</Badge>
-        </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">当前总分已≥目标分，无需任何加分项。</p>
-      </Card>
-    );
-  }
+  return { result, relaxed };
+}
+
+function ResultBody({ result, onExclude, fadingId }) {
   const grouped = result.selected.reduce((m, c) => {
     (m[c.module] = m[c.module] || []).push(c);
     return m;
   }, {});
   return (
-    <Card>
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
-        {badge && <Badge color={badge.color}>{badge.label}</Badge>}
-        <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 font-mono">
-          耗时 {result.timeMs.toFixed(2)} ms
-        </span>
-      </div>
+    <>
       <div className="grid grid-cols-3 gap-2 mb-4 text-center">
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">目标分差</div>
@@ -63,7 +50,7 @@ function ResultCard({ title, result, badge }) {
           <div className="font-mono text-sm font-semibold text-emerald-600 dark:text-emerald-400">+{result.achievable.toFixed(1)}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">总代价</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">总时长</div>
           <div className="font-mono text-sm font-semibold text-orange-600 dark:text-orange-400">{result.cost} 小时</div>
         </div>
       </div>
@@ -77,49 +64,105 @@ function ResultCard({ title, result, badge }) {
               </span>
             </div>
             <ul className="space-y-1 ml-1">
-              {items.map((c, i) => (
-                <li key={`${c.id}-${i}`} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-sm">
-                  <span className="text-slate-700 dark:text-slate-200">{c.label}</span>
-                  <span className="shrink-0 font-mono text-xs">
-                    <span className="text-emerald-600 dark:text-emerald-400">+{c.value}</span>
-                    <span className="text-slate-400 dark:text-slate-500 mx-1">/</span>
-                    <span className="text-orange-600 dark:text-orange-400">{formatCost(c.cost)}</span>
-                  </span>
-                </li>
-              ))}
+              {items.map((c) => {
+                const fading = fadingId === c.id;
+                return (
+                  <li
+                    key={c.id}
+                    className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-sm transition-all duration-200 ${fading ? "opacity-30 line-through" : "opacity-100"}`}
+                  >
+                    <span className="text-slate-700 dark:text-slate-200 flex-1 truncate">{c.label}</span>
+                    <span className="shrink-0 font-mono text-xs">
+                      <span className="text-emerald-600 dark:text-emerald-400">+{c.value}</span>
+                      <span className="text-slate-400 dark:text-slate-500 mx-1">/</span>
+                      <span className="text-orange-600 dark:text-orange-400">{formatCost(c.cost)}</span>
+                    </span>
+                    <button
+                      onClick={() => onExclude(c.id)}
+                      disabled={fading}
+                      aria-label={`排除${c.label}`}
+                      title="排除此项"
+                      className="shrink-0 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-1 rounded transition disabled:opacity-50"
+                    >
+                      <IconX />
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
       </div>
-    </Card>
+    </>
   );
 }
 
 export function RecommenderTab({ scores }) {
   const [target, setTarget] = useState(() => Math.min(105, Math.ceil(scores.total + 5)));
-  const [running, setRunning] = useState(false);
   const [result, setResult] = useState(null);
+  const [relaxed, setRelaxed] = useState(null);
+  const [excludedIds, setExcludedIds] = useState(() => loadExcluded());
+  const [includeHard, setIncludeHard] = useState(false);
+  const [fadingId, setFadingId] = useState(null);
+  const hasComputedRef = useRef(false);
 
-  const info = useMemo(() => complexityInfo(), []);
+  useEffect(() => { saveExcluded(excludedIds); }, [excludedIds]);
 
-  const onCompute = () => {
-    setRunning(true);
-    // 异步避免阻塞 UI（虽然 DP 仅几毫秒，但为了仪式感）
-    setTimeout(() => {
-      const r = compareAlgorithms(scores, target);
-      setResult(r);
-      setRunning(false);
-    }, 50);
+  const labelById = useMemo(() => {
+    const m = {};
+    for (const c of CANDIDATES) m[c.id] = c.label;
+    return m;
+  }, []);
+
+  const hiddenHardCount = useMemo(
+    () => CANDIDATES.filter(c => c.difficulty === "very-hard" && !excludedIds.has(c.id)).length,
+    [excludedIds]
+  );
+
+  const compute = () => {
+    hasComputedRef.current = true;
+    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard);
+    setResult(r);
+    setRelaxed(rx);
   };
 
+  useEffect(() => {
+    if (!hasComputedRef.current) return;
+    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard);
+    setResult(r);
+    setRelaxed(rx);
+    // target 故意不在依赖里：滑块拖动不应触发自动重算
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [excludedIds, includeHard]);
+
+  const onExclude = (id) => {
+    setFadingId(id);
+    setTimeout(() => {
+      setExcludedIds(prev => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+      setFadingId(null);
+    }, 200);
+  };
+
+  const onRestore = (id) => {
+    setExcludedIds(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
+  const onClearExcluded = () => setExcludedIds(new Set());
+
   const gap = target - scores.total;
-  const dpVsGreedy = result && result.dp.feasible && result.greedy.feasible
-    ? { saved: result.greedy.cost - result.dp.cost, ratio: (1 - result.dp.cost / result.greedy.cost) * 100 }
-    : null;
+  const excludedArray = [...excludedIds];
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="🧮" title="目标分推荐器" subtitle="0/1 背包 DP vs 贪心算法 · 反向求解最优加分组合" score={scores.total} maxScore={105} color="orange" />
+      <SectionTitle icon="🧮" title="目标分推荐器" subtitle="推荐最经济的加分组合" score={scores.total} maxScore={105} color="orange" />
 
       <Card>
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">设置目标</h3>
@@ -141,54 +184,81 @@ export function RecommenderTab({ scores }) {
             <span>105</span>
           </div>
         </div>
-        <button onClick={onCompute} disabled={running || gap <= 0}
+        <button onClick={compute} disabled={gap <= 0}
           className="w-full py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white text-sm font-medium transition disabled:cursor-not-allowed">
-          {running ? "计算中…" : gap <= 0 ? "目标已达成" : "计算最优加分方案"}
+          {gap <= 0 ? "目标已达成" : "生成推荐"}
         </button>
+
+        {excludedArray.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400">已排除 {excludedArray.length} 项</span>
+              <button onClick={onClearExcluded} className="ml-auto text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 underline">
+                全部恢复
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {excludedArray.map(id => (
+                <button key={id} onClick={() => onRestore(id)}
+                  title="点击恢复"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-300 transition">
+                  <span className="truncate max-w-[10rem]">{labelById[id] || id}</span>
+                  <span aria-hidden>×</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
-      {result && (
-        <>
-          <ResultCard title="DP 精确解（0/1 背包）" result={result.dp} badge={{ label: "最优", color: "emerald" }} />
-          <ResultCard title="贪心解（按性价比降序）" result={result.greedy} badge={{ label: "近似", color: "amber" }} />
-
-          {dpVsGreedy && (
-            <Card className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">📊 算法对比</h3>
-              {dpVsGreedy.saved > 0 ? (
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                  本场景下 DP 比贪心节省 <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{dpVsGreedy.saved.toFixed(0)} 小时</span>
-                  <span className="text-slate-400 dark:text-slate-500">（{dpVsGreedy.ratio.toFixed(1)}%）</span>
-                </p>
-              ) : (
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                  本场景下两算法解相同（贪心恰好命中最优）。
-                </p>
-              )}
-              <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
-                <div className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-                  <div className="text-slate-500 dark:text-slate-400 mb-1">DP 耗时</div>
-                  <div className="font-mono font-semibold text-slate-700 dark:text-slate-200">{result.dp.timeMs.toFixed(3)} ms</div>
-                </div>
-                <div className="px-3 py-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-                  <div className="text-slate-500 dark:text-slate-400 mb-1">贪心耗时</div>
-                  <div className="font-mono font-semibold text-slate-700 dark:text-slate-200">{result.greedy.timeMs.toFixed(3)} ms</div>
-                </div>
-              </div>
-            </Card>
+      {hiddenHardCount > 0 && (
+        <div className="text-xs text-slate-500 dark:text-slate-400 px-1">
+          {includeHard ? (
+            <>已包含全部高难度项目（{VERY_HARD_HINT}）。<button onClick={() => setIncludeHard(false)} className="text-orange-600 dark:text-orange-400 hover:underline">隐藏</button></>
+          ) : (
+            <>已自动隐藏 {hiddenHardCount} 项高难度推荐（{VERY_HARD_HINT}）。<button onClick={() => setIncludeHard(true)} className="text-orange-600 dark:text-orange-400 hover:underline">显示</button></>
           )}
-        </>
+        </div>
       )}
 
-      <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">算法说明</h3>
-        <div className="text-xs text-slate-600 dark:text-slate-300 space-y-2">
-          <p><span className="font-semibold">问题建模：</span>给定当前总分 S 与目标 T，候选项集合 {`{(v_i, c_i, m_i)}`}（增量 / 代价 / 模块），求 0/1 决策变量 x_i 使 Σv_i·x_i ≥ T-S 且 Σc_i·x_i 最小，受各模块上限与组织任职互斥约束。</p>
-          <p><span className="font-semibold">DP 算法：</span>分模块 0/1 背包获得 cost(v) 表 → 跨模块合并背包 → 在 v ≥ T-S 区间取最小 cost 并回溯。复杂度 {info.dp}。</p>
-          <p><span className="font-semibold">贪心算法：</span>按 v_i / c_i 降序选取直至满足约束。复杂度 {info.greedy}，作为近似解对照。</p>
-          <p className="text-slate-400 dark:text-slate-500">候选项库共 {info.N} 项 · 总状态空间 W = {info.W_total}（0.1 精度 × 105 满分）</p>
+      {result && !result.feasible && (
+        <Card className="border-red-300 dark:border-red-700">
+          <h3 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">无法达成目标</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
+            当前排除项与候选范围下，剩余可选项不足以达到目标分。可恢复部分排除项、调低目标分，或包含高难度项目。
+          </p>
+          {relaxed && (
+            <button onClick={() => setIncludeHard(true)}
+              className="w-full py-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 transition">
+              包含高难度项目后可达成，总时长 {relaxed.cost} 小时 · 一键包含
+            </button>
+          )}
+        </Card>
+      )}
+
+      {result && result.feasible && result.selected.length === 0 && (
+        <Card>
+          <Badge color="emerald">已达标</Badge>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">当前总分已≥目标分，无需任何加分项。</p>
+        </Card>
+      )}
+
+      {result && result.feasible && result.selected.length > 0 && (
+        <Card>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
+          <ResultBody result={result} onExclude={onExclude} fadingId={fadingId} />
+        </Card>
+      )}
+
+      <details className="group">
+        <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 select-none py-1">
+          了解推荐原理
+        </summary>
+        <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 space-y-1 px-1">
+          <p>推荐器以"达到目标分所需总时长最少"为优化目标，在各模块上限与组织任职互斥约束下求最优组合。</p>
+          <p>算法细节与实验对比见仓库内 <code className="text-slate-600 dark:text-slate-300">docs/ALGORITHM.md</code>。</p>
         </div>
-      </Card>
+      </details>
     </div>
   );
 }
