@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, Badge, SectionTitle } from "../ui";
+import { Card, Badge, SectionTitle, Select, Checkbox } from "../ui";
 import { IconX } from "../icons";
-import { recommend, CANDIDATES } from "../../algorithms/recommender";
-import { loadExcluded, saveExcluded } from "../../hooks/useLocalStorage";
+import {
+  recommend, CANDIDATES, isCandidateReasonable,
+  USER_CONTEXT_DIMENSIONS, DEFAULT_USER_CONTEXT,
+} from "../../algorithms/recommender";
+import {
+  loadExcluded, saveExcluded,
+  loadUserContext, saveUserContext,
+} from "../../hooks/useLocalStorage";
 
 const MODULE_META = {
   conduct: { label: "品行素质", color: "teal" },
@@ -12,22 +18,24 @@ const MODULE_META = {
   reward: { label: "奖励分", color: "amber" },
 };
 
-const VERY_HARD_HINT = "破纪录、国家级奖项、省级以上荣誉等";
-
 function formatCost(hours) {
   if (hours === Infinity) return "—";
   if (hours >= 100) return `${hours} 小时（≈${(hours / 8).toFixed(1)} 工作日）`;
   return `${hours} 小时`;
 }
 
-function runRecommend(scores, target, excludedIds, includeHard) {
+function runRecommend(scores, target, excludedIds, includeHard, userContext) {
   const filtered = CANDIDATES.filter(c =>
-    !excludedIds.has(c.id) && (includeHard || c.difficulty !== "very-hard")
+    !excludedIds.has(c.id) &&
+    (includeHard || c.difficulty !== "very-hard") &&
+    isCandidateReasonable(c, userContext)
   );
   const result = recommend(scores, target, filtered);
   let relaxed = null;
   if (!result.feasible && !includeHard) {
-    const r = recommend(scores, target, CANDIDATES.filter(c => !excludedIds.has(c.id)));
+    const r = recommend(scores, target, CANDIDATES.filter(c =>
+      !excludedIds.has(c.id) && isCandidateReasonable(c, userContext)
+    ));
     if (r.feasible) relaxed = r;
   }
   return { result, relaxed };
@@ -102,11 +110,13 @@ export function RecommenderTab({ scores }) {
   const [result, setResult] = useState(null);
   const [relaxed, setRelaxed] = useState(null);
   const [excludedIds, setExcludedIds] = useState(() => loadExcluded());
-  const [includeHard, setIncludeHard] = useState(false);
+  const [includeHard, setIncludeHard] = useState(true);
+  const [userContext, setUserContext] = useState(() => loadUserContext());
   const [fadingId, setFadingId] = useState(null);
   const hasComputedRef = useRef(false);
 
   useEffect(() => { saveExcluded(excludedIds); }, [excludedIds]);
+  useEffect(() => { saveUserContext(userContext); }, [userContext]);
 
   const labelById = useMemo(() => {
     const m = {};
@@ -114,26 +124,21 @@ export function RecommenderTab({ scores }) {
     return m;
   }, []);
 
-  const hiddenHardCount = useMemo(
-    () => CANDIDATES.filter(c => c.difficulty === "very-hard" && !excludedIds.has(c.id)).length,
-    [excludedIds]
-  );
-
   const compute = () => {
     hasComputedRef.current = true;
-    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard);
+    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard, userContext);
     setResult(r);
     setRelaxed(rx);
   };
 
   useEffect(() => {
     if (!hasComputedRef.current) return;
-    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard);
+    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard, userContext);
     setResult(r);
     setRelaxed(rx);
     // target 故意不在依赖里：滑块拖动不应触发自动重算
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [excludedIds, includeHard]);
+  }, [excludedIds, includeHard, userContext]);
 
   const onExclude = (id) => {
     setFadingId(id);
@@ -156,9 +161,11 @@ export function RecommenderTab({ scores }) {
   };
 
   const onClearExcluded = () => setExcludedIds(new Set());
+  const onClearContext = () => setUserContext({ ...DEFAULT_USER_CONTEXT });
 
   const gap = target - scores.total;
   const excludedArray = [...excludedIds];
+  const contextFilledCount = Object.values(userContext).filter(v => v != null).length;
 
   return (
     <div className="space-y-4">
@@ -211,21 +218,60 @@ export function RecommenderTab({ scores }) {
         )}
       </Card>
 
-      {hiddenHardCount > 0 && (
-        <div className="text-xs text-slate-500 dark:text-slate-400 px-1">
-          {includeHard ? (
-            <>已包含全部高难度项目（{VERY_HARD_HINT}）。<button onClick={() => setIncludeHard(false)} className="text-orange-600 dark:text-orange-400 hover:underline">隐藏</button></>
-          ) : (
-            <>已自动隐藏 {hiddenHardCount} 项高难度推荐（{VERY_HARD_HINT}）。<button onClick={() => setIncludeHard(true)} className="text-orange-600 dark:text-orange-400 hover:underline">显示</button></>
-          )}
-        </div>
-      )}
+      <Card>
+        <label className="flex items-start gap-3 cursor-pointer">
+          <div className="pt-0.5">
+            <Checkbox checked={includeHard} onChange={setIncludeHard} label="" />
+          </div>
+          <div className="flex-1 -ml-1">
+            <div className="text-sm font-medium text-slate-700 dark:text-slate-200">包含高难度项目</div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              如破校纪录、国家级竞赛奖项、省级以上荣誉、出版专著、发明专利等。取消勾选可仅看容易达成的项目。
+            </p>
+          </div>
+        </label>
+      </Card>
+
+      <Card>
+        <details open className="group">
+          <summary className="cursor-pointer flex items-center gap-2 select-none list-none">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">我的现状</h3>
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              {contextFilledCount > 0 ? `已填 ${contextFilledCount}/6 项` : "可选 · 填写后推荐更贴合实际"}
+            </span>
+            <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform">▾</span>
+          </summary>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-3">
+            推荐器只会建议「不超过你已达档位」的项目。例如选择"任职=三级"，将不再推荐一/二级职务。
+          </p>
+          <div className="space-y-2">
+            {Object.entries(USER_CONTEXT_DIMENSIONS).map(([key, dim]) => (
+              <div key={key} className="flex items-center gap-2">
+                <label className="text-xs text-slate-600 dark:text-slate-300 w-24 shrink-0">{dim.label}</label>
+                <Select
+                  value={userContext[key] ?? ""}
+                  onChange={v => setUserContext(prev => ({ ...prev, [key]: v === "" ? null : v }))}
+                  options={[{ value: "", label: "不指定" }, ...dim.options.map(o => ({ value: o.v, label: o.l }))]}
+                />
+              </div>
+            ))}
+            {contextFilledCount > 0 && (
+              <div className="flex justify-end pt-1">
+                <button onClick={onClearContext}
+                  className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 underline">
+                  清空全部
+                </button>
+              </div>
+            )}
+          </div>
+        </details>
+      </Card>
 
       {result && !result.feasible && (
         <Card className="border-red-300 dark:border-red-700">
           <h3 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">无法达成目标</h3>
           <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
-            当前排除项与候选范围下，剩余可选项不足以达到目标分。可恢复部分排除项、调低目标分，或包含高难度项目。
+            当前候选项不足以达成目标。可以：① 取消已排除的项目；② 在「我的现状」中提高已声明的最高档位以扩大推荐范围；③ 或调低目标分。
           </p>
           {relaxed && (
             <button onClick={() => setIncludeHard(true)}
