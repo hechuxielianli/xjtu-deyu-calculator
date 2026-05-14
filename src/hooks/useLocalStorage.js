@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { STORAGE_KEY, STORAGE_VERSION, DEFAULT_STATE } from "../data/constants";
+import { DEFAULT_USER_CONTEXT } from "../algorithms/recommender";
 
 export function loadState() {
   try {
@@ -33,4 +34,19 @@ export function loadExcluded() {
 
 export function saveExcluded(set) {
   try { localStorage.setItem(EXCLUDED_KEY, JSON.stringify([...set])); } catch {}
+}
+
+const USER_CONTEXT_KEY = "deyu_recommender_user_context_v1";
+
+export function loadUserContext() {
+  try {
+    const raw = localStorage.getItem(USER_CONTEXT_KEY);
+    if (!raw) return { ...DEFAULT_USER_CONTEXT };
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_USER_CONTEXT, ...(parsed || {}) };
+  } catch { return { ...DEFAULT_USER_CONTEXT }; }
+}
+
+export function saveUserContext(ctx) {
+  try { localStorage.setItem(USER_CONTEXT_KEY, JSON.stringify(ctx)); } catch {}
 }

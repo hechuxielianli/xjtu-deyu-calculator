@@ -1,7 +1,10 @@
 // 推荐器单测：直接 `node src/algorithms/recommender.test.js` 运行
 // 无需测试框架，断言失败即抛出。
 
-import { recommend, recommendGreedy, compareAlgorithms, CANDIDATES, complexityInfo } from "./recommender.js";
+import {
+  recommend, recommendGreedy, compareAlgorithms, CANDIDATES, complexityInfo,
+  isCandidateReasonable, DEFAULT_USER_CONTEXT,
+} from "./recommender.js";
 
 let passed = 0;
 let failed = 0;
@@ -155,6 +158,60 @@ console.log("\n=== Test 12: 空候选池返回 infeasible 不崩 ===");
   assert(r.feasible === false, "feasible = false");
   assert(typeof r.gap === "number", "返回 gap 字段");
   assert(Array.isArray(r.selected), "返回 selected 数组");
+}
+
+console.log("\n=== Test 13: 空 userContext / 全 null 时不过滤任何项 ===");
+{
+  const allTrueDefault = CANDIDATES.every(c => isCandidateReasonable(c, DEFAULT_USER_CONTEXT));
+  const allTrueEmpty = CANDIDATES.every(c => isCandidateReasonable(c, {}));
+  assert(allTrueDefault, "DEFAULT_USER_CONTEXT 下所有候选项都通过");
+  assert(allTrueEmpty, "空对象 {} 下所有候选项都通过");
+}
+
+console.log("\n=== Test 14: 组织任职升档约束（三级用户不应推一二级）===");
+{
+  const ctx = { ...DEFAULT_USER_CONTEXT, org: "t3" };
+  const ok3 = CANDIDATES.filter(c => c.id.startsWith("org_3_")).every(c => isCandidateReasonable(c, ctx));
+  const ok4 = CANDIDATES.filter(c => c.id.startsWith("org_4_")).every(c => isCandidateReasonable(c, ctx));
+  const reject2 = CANDIDATES.filter(c => c.id.startsWith("org_2_")).every(c => !isCandidateReasonable(c, ctx));
+  const reject1 = CANDIDATES.filter(c => c.id.startsWith("org_1_")).every(c => !isCandidateReasonable(c, ctx));
+  assert(ok3, "三级用户：所有三级职务通过");
+  assert(ok4, "三级用户：所有四级职务通过");
+  assert(reject2, "三级用户：所有二级职务被拒");
+  assert(reject1, "三级用户：所有一级职务被拒");
+
+  // "暂无" → 仅四级
+  const ctxNone = { ...DEFAULT_USER_CONTEXT, org: "none" };
+  const onlyT4 = CANDIDATES.filter(c => c.id.startsWith("org_") && isCandidateReasonable(c, ctxNone))
+    .every(c => c.id.startsWith("org_4_"));
+  assert(onlyT4, "暂无任职用户：仅四级职务通过");
+}
+
+console.log('\n=== Test 15: 学科竞赛"暂无"用户仅推校级 ===');
+{
+  const ctx = { ...DEFAULT_USER_CONTEXT, academic: "none" };
+  const okSchool = CANDIDATES.filter(c => c.id.startsWith("comp_school")).every(c => isCandidateReasonable(c, ctx));
+  const rejectProv = CANDIDATES.filter(c => c.id.startsWith("comp_prov")).every(c => !isCandidateReasonable(c, ctx));
+  const rejectNat = CANDIDATES.filter(c => c.id.startsWith("comp_nat")).every(c => !isCandidateReasonable(c, ctx));
+  assert(okSchool, "暂无学科竞赛经验：所有校级项通过");
+  assert(rejectProv, "暂无学科竞赛经验：所有省级项被拒");
+  assert(rejectNat, "暂无学科竞赛经验：所有国家级项被拒");
+}
+
+console.log('\n=== Test 16: 论文"国内一般"用户不推核心 / 国际 / 专著 ===');
+{
+  const ctx = { ...DEFAULT_USER_CONTEXT, paper: "general" };
+  const okGeneral = CANDIDATES.filter(c => c.id.startsWith("paper_general")).every(c => isCandidateReasonable(c, ctx));
+  const rejectCore = CANDIDATES.filter(c => c.id.startsWith("paper_core")).every(c => !isCandidateReasonable(c, ctx));
+  const rejectIntl = CANDIDATES.filter(c => c.id.startsWith("paper_intl")).every(c => !isCandidateReasonable(c, ctx));
+  const rejectBookPat = ["book_first", "patent_invention"].every(id => {
+    const c = CANDIDATES.find(x => x.id === id);
+    return c && !isCandidateReasonable(c, ctx);
+  });
+  assert(okGeneral, "国内一般用户：一般期刊各档通过");
+  assert(rejectCore, "国内一般用户：核心期刊各档被拒");
+  assert(rejectIntl, "国内一般用户：国际期刊各档被拒");
+  assert(rejectBookPat, "国内一般用户：专著与发明专利被拒");
 }
 
 console.log(`\n=== 总计 ${passed + failed} 项断言：${passed} 通过，${failed} 失败 ===`);
