@@ -62,14 +62,18 @@ export function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
   );
 }
 
-export function Checkbox({ checked, onChange, label }) {
+export function Checkbox({ checked, onChange, label, disabled }) {
   return (
-    <label className="flex items-start gap-2 cursor-pointer group">
+    <label className={cn("flex items-start gap-2 group",
+      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer")}>
       <div className={cn("w-4 h-4 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all",
-        checked ? "bg-teal-500 border-teal-500" : "border-slate-300 group-hover:border-slate-400 dark:border-slate-500")}>
+        checked && !disabled ? "bg-teal-500 border-teal-500"
+          : checked && disabled ? "bg-slate-400 border-slate-400 dark:bg-slate-500 dark:border-slate-500"
+          : "border-slate-300 group-hover:border-slate-400 dark:border-slate-500")}>
         {checked && <IconCheck />}
       </div>
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
+      <input type="checkbox" checked={checked} disabled={disabled}
+        onChange={e => !disabled && onChange(e.target.checked)} className="sr-only" />
       <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </label>
   );

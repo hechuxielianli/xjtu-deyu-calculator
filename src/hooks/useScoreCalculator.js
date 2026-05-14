@@ -17,14 +17,19 @@ export function useScoreCalculator(state) {
     let political = 0;
     if (politicalStudy.basic) political += 1;
     if (politicalStudy.provincial) political += 2;
-    if (politicalStudy.outstanding) political += 1;
+    // "优秀学员" 是额外加分，需先参加至少一项培训
+    if (politicalStudy.outstanding && (politicalStudy.basic || politicalStudy.provincial)) political += 1;
     political = Math.min(3, political);
 
     let social = Math.min(1, socialService.volunteerHours / 32);
     if (socialService.socialPractice) social += 1;
     if (socialService.internLevel === "city") social += 1;
     if (socialService.internLevel === "province") social += 2;
-    if (socialService.advancedIndividual) social += 1;
+    // "先进个人" 是额外加分，需先参加任一社会服务项目
+    const hasAnyService = socialService.volunteerHours > 0
+      || socialService.socialPractice
+      || socialService.internLevel !== "none";
+    if (socialService.advancedIndividual && hasAnyService) social += 1;
     social = Math.min(4, social);
 
     const penaltyTotal = penalties.reduce((s, p) => s + (PENALTY_TYPES[p.type]?.score || 0) * (p.count || 1), 0);

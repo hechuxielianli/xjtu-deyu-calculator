@@ -71,8 +71,17 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
         <div className="space-y-2.5">
           <Checkbox checked={politicalStudy.basic} onChange={v => setPoliticalStudy(p => ({ ...p, basic: v }))} label="参加党团组织理论学习培训（含网络学习）(+1)" />
           <Checkbox checked={politicalStudy.provincial} onChange={v => setPoliticalStudy(p => ({ ...p, provincial: v }))} label="参加省、部级理论学习培训 (+2)" />
-          <Checkbox checked={politicalStudy.outstanding} onChange={v => setPoliticalStudy(p => ({ ...p, outstanding: v }))} label="获得优秀学员 (额外+1)" />
+          <Checkbox
+            checked={politicalStudy.outstanding}
+            disabled={!(politicalStudy.basic || politicalStudy.provincial)}
+            onChange={v => setPoliticalStudy(p => ({ ...p, outstanding: v }))}
+            label="获得优秀学员 (额外+1，需先参加培训)" />
         </div>
+        {politicalStudy.outstanding && !(politicalStudy.basic || politicalStudy.provincial) && (
+          <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+            "优秀学员"需先参加至少一项培训才能计入分数。
+          </p>
+        )}
         <div className="mt-2 text-right"><Badge color="teal">+{scores.conduct.political.toFixed(1)}</Badge></div>
       </Card>
 
@@ -89,7 +98,25 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
           <Select value={socialService.internLevel} onChange={v => setSocialService(p => ({ ...p, internLevel: v }))}
             options={[{ value: "none", label: "未参加" }, { value: "city", label: "市、县级 (+1)" }, { value: "province", label: "省、部级 / 国际组织 (+2)" }]} />
         </Field>
-        <Checkbox checked={socialService.advancedIndividual} onChange={v => setSocialService(p => ({ ...p, advancedIndividual: v }))} label="获先进个人及表彰 (额外+1)" />
+        {(() => {
+          const hasAnyService = socialService.volunteerHours > 0
+            || socialService.socialPractice
+            || socialService.internLevel !== "none";
+          return (
+            <>
+              <Checkbox
+                checked={socialService.advancedIndividual}
+                disabled={!hasAnyService}
+                onChange={v => setSocialService(p => ({ ...p, advancedIndividual: v }))}
+                label="获先进个人及表彰 (额外+1，需先参加服务)" />
+              {socialService.advancedIndividual && !hasAnyService && (
+                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                  "先进个人"需先参加任一社会服务项目才能计入分数。
+                </p>
+              )}
+            </>
+          );
+        })()}
         <div className="mt-2 text-right"><Badge color="teal">+{scores.conduct.social.toFixed(1)}</Badge></div>
       </Card>
 
