@@ -9,9 +9,9 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="🏆" title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="orange" />
+      <SectionTitle icon="🏆" title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="ability" />
 
-      <div className="rounded-2xl border border-orange-200/60 bg-orange-50/40 dark:border-orange-800/40 dark:bg-orange-950/20 p-2 sm:p-3 space-y-3">
+      <div className="rounded-2xl border border-ability-200/50 bg-ability-50/30 dark:border-ability-700/30 dark:bg-ability-950/20 backdrop-blur-sm p-2 sm:p-3 space-y-3">
         <Card>
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖<RuleTooltip content={TOOLTIP_ACADEMIC} /></h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
@@ -23,7 +23,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
                 onMoveUp={i > 0 ? () => setAcademicComps(cs => moveUp(cs, i)) : null}
                 onMoveDown={i < academicComps.length - 1 ? () => setAcademicComps(cs => moveDown(cs, i)) : null}
                 showReorder={academicComps.length > 1}
-                score={getAcademicCompScore(c)}>
+                score={getAcademicCompScore(c)} scoreColor="ability">
                 <div className="min-w-[120px] flex-1 sm:flex-none sm:w-36">
                   <Select value={c.level} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
                     options={Object.entries(ACADEMIC_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
@@ -50,7 +50,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
                 onMoveUp={i > 0 ? () => setPapers(ps => moveUp(ps, i)) : null}
                 onMoveDown={i < papers.length - 1 ? () => setPapers(ps => moveDown(ps, i)) : null}
                 showReorder={papers.length > 1}
-                score={getPaperScore(p)}>
+                score={getPaperScore(p)} scoreColor="ability">
                 <div className="min-w-[120px] flex-1 sm:flex-none sm:w-40">
                   <Select value={p.type} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, type: v } : pp))}
                     options={Object.entries(PAPER_SCORES).map(([k, v]) => ({ value: k, label: v.label }))} />
@@ -66,7 +66,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
           />
         </Card>
 
-        <div className="mt-1 pr-2 text-right"><Badge color="orange">学术: {scores.ability.academic.toFixed(1)}/10</Badge></div>
+        <div className="mt-1 pr-2 text-right"><Badge color="ability">学术: {scores.ability.academic.toFixed(1)}/10</Badge></div>
       </div>
 
       <Card>
@@ -80,7 +80,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               onMoveUp={i > 0 ? () => setArtComps(cs => moveUp(cs, i)) : null}
               onMoveDown={i < artComps.length - 1 ? () => setArtComps(cs => moveDown(cs, i)) : null}
               showReorder={artComps.length > 1}
-              score={getArtScore(c)}>
+              score={getArtScore(c)} scoreColor="ability">
               <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
                 <Select value={c.level} onChange={v => setArtComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
                   options={Object.entries(ART_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
@@ -106,7 +106,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               onMoveUp={i > 0 ? () => setSportComps(cs => moveUp(cs, i)) : null}
               onMoveDown={i < sportComps.length - 1 ? () => setSportComps(cs => moveDown(cs, i)) : null}
               showReorder={sportComps.length > 1}
-              score={getSportScore(c)}>
+              score={getSportScore(c)} scoreColor="ability">
               <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
                 <Select value={c.level} onChange={v => setSportComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
                   options={Object.entries(SPORT_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
@@ -123,11 +123,11 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
           <Select value={recordBreak} onChange={setRecordBreak}
             options={[{ value: "none", label: "未破纪录" }, { value: "provincial", label: "破省级及以上 (+5)" }, { value: "school", label: "破校级 (+3)" }]} />
         </Field>
-        <div className="mt-2 text-right"><Badge color="orange">文体: {scores.ability.artSport.toFixed(1)}/6</Badge></div>
+        <div className="mt-2 text-right"><Badge color="ability">文体: {scores.ability.artSport.toFixed(1)}/6</Badge></div>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="orange">上限 4</Badge></h3>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="ability">上限 4</Badge></h3>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">多职务以最高分计，不累加</p>
         <Field label="最高职务级别">
           <Select value={orgPosition.level} onChange={v => setOrgPosition(p => ({ ...p, level: Number(v) }))}
@@ -139,7 +139,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               options={[{ value: "none", label: "请选择" }, { value: "excellent", label: "优" }, { value: "good", label: "良" }, { value: "pass", label: "合格" }]} />
           </Field>
         )}
-        <div className="mt-2 text-right"><Badge color="orange">任职: {scores.ability.org.toFixed(1)}/4</Badge></div>
+        <div className="mt-2 text-right"><Badge color="ability">任职: {scores.ability.org.toFixed(1)}/4</Badge></div>
       </Card>
     </div>
   );

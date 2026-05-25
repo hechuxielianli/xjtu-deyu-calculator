@@ -21,6 +21,7 @@ export function usePersistState(state) {
     state.recordBreak, state.orgPosition, state.honors, state.goodDeeds]);
 }
 
+// ── 推荐器：用户排除项 ──
 const EXCLUDED_KEY = "deyu_recommender_excluded_v1";
 
 export function loadExcluded() {
@@ -33,9 +34,10 @@ export function loadExcluded() {
 }
 
 export function saveExcluded(set) {
-  try { localStorage.setItem(EXCLUDED_KEY, JSON.stringify([...set])); } catch {}
+  try { localStorage.setItem(EXCLUDED_KEY, JSON.stringify([...set])); } catch { /* ignore */ }
 }
 
+// ── 推荐器：用户现状问卷 ──
 const USER_CONTEXT_KEY = "deyu_recommender_user_context_v1";
 
 export function loadUserContext() {
@@ -48,5 +50,5 @@ export function loadUserContext() {
 }
 
 export function saveUserContext(ctx) {
-  try { localStorage.setItem(USER_CONTEXT_KEY, JSON.stringify(ctx)); } catch {}
+  try { localStorage.setItem(USER_CONTEXT_KEY, JSON.stringify(ctx)); } catch { /* ignore */ }
 }

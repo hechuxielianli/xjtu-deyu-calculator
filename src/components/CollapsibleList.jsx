@@ -14,13 +14,13 @@ export function CollapsibleList({ items, threshold = 3, renderItem, renderAdd })
       {visibleItems.map((item, i) => renderItem(item, i))}
       {shouldCollapse && !expanded && (
         <button onClick={() => setExpanded(true)}
-          className="w-full py-1.5 text-xs text-center text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition mb-2">
+          className="w-full py-1.5 text-xs text-center text-brand-600 dark:text-brand-300 hover:bg-brand-50/70 dark:hover:bg-brand-900/30 rounded-lg transition mb-2">
           展开剩余 {items.length - threshold} 项
         </button>
       )}
       {shouldCollapse && expanded && (
         <button onClick={() => setExpanded(false)}
-          className="w-full py-1.5 text-xs text-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition mb-2">
+          className="w-full py-1.5 text-xs text-center text-slate-400 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-lg transition mb-2">
           收起
         </button>
       )}

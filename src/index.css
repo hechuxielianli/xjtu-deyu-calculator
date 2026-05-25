@@ -2,17 +2,199 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  /* ── Brand / Accent (Aurora 极光蓝紫) ── */
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
+
+  --color-accent-50:  #f5f3ff;
+  --color-accent-100: #ede9fe;
+  --color-accent-200: #ddd6fe;
+  --color-accent-300: #c4b5fd;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8b5cf6;
+  --color-accent-600: #7c3aed;
+  --color-accent-700: #6d28d9;
+  --color-accent-800: #5b21b6;
+  --color-accent-900: #4c1d95;
+  --color-accent-950: #2e1065;
+
+  /* ── 三模块语义色 ── */
+  /* 品行 = sky */
+  --color-conduct-50:  #f0f9ff;
+  --color-conduct-100: #e0f2fe;
+  --color-conduct-200: #bae6fd;
+  --color-conduct-300: #7dd3fc;
+  --color-conduct-400: #38bdf8;
+  --color-conduct-500: #0ea5e9;
+  --color-conduct-600: #0284c7;
+  --color-conduct-700: #0369a1;
+  --color-conduct-800: #075985;
+  --color-conduct-900: #0c4a6e;
+  --color-conduct-950: #082f49;
+
+  /* 能力 = fuchsia */
+  --color-ability-50:  #fdf4ff;
+  --color-ability-100: #fae8ff;
+  --color-ability-200: #f5d0fe;
+  --color-ability-300: #f0abfc;
+  --color-ability-400: #e879f9;
+  --color-ability-500: #d946ef;
+  --color-ability-600: #c026d3;
+  --color-ability-700: #a21caf;
+  --color-ability-800: #86198f;
+  --color-ability-900: #701a75;
+  --color-ability-950: #4a044e;
+
+  /* 奖励 = amber */
+  --color-reward-50:  #fffbeb;
+  --color-reward-100: #fef3c7;
+  --color-reward-200: #fde68a;
+  --color-reward-300: #fcd34d;
+  --color-reward-400: #fbbf24;
+  --color-reward-500: #f59e0b;
+  --color-reward-600: #d97706;
+  --color-reward-700: #b45309;
+  --color-reward-800: #92400e;
+  --color-reward-900: #78350f;
+  --color-reward-950: #451a03;
+
+  /* 危险 = red */
+  --color-danger-50:  #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger-800: #991b1b;
+  --color-danger-900: #7f1d1d;
+  --color-danger-950: #450a0a;
+
+  /* 成功 = emerald */
+  --color-success-50:  #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-200: #a7f3d0;
+  --color-success-300: #6ee7b7;
+  --color-success-400: #34d399;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-success-800: #065f46;
+  --color-success-900: #064e3b;
+  --color-success-950: #022c22;
+
+  /* ── 玻璃 / 阴影 / 圆角 ── */
+  --shadow-glass-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -6px rgba(15, 23, 42, 0.06);
+  --shadow-glass-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.10);
+  --shadow-glass-lg: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 40px -16px rgba(79, 70, 229, 0.18);
+
+  --radius-card:     1rem;
+  --radius-card-lg:  1.25rem;
+
+  /* ── 微动效 ── */
+  --animate-aurora-drift: auroraDrift 18s ease-in-out infinite;
+  --animate-aurora-drift-slow: auroraDrift 26s ease-in-out infinite;
+  --animate-card-shine: cardShine 1.2s ease-out;
+}
+
+@keyframes auroraDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: var(--blob-opacity, 0.4); }
+  33%      { transform: translate3d(40px, -30px, 0) scale(1.08); opacity: calc(var(--blob-opacity, 0.4) * 1.1); }
+  66%      { transform: translate3d(-30px, 25px, 0) scale(0.96); opacity: calc(var(--blob-opacity, 0.4) * 0.85); }
+}
+
+@keyframes cardShine {
+  0%   { transform: translateX(-100%) skewX(-12deg); opacity: 0; }
+  20%  { opacity: 0.5; }
+  100% { transform: translateX(220%) skewX(-12deg); opacity: 0; }
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
-  background-color: #99f6e4;
-  color: #0f172a;
+  background-color: #c7d2fe;
+  color: #1e1b4b;
 }
 
 .dark ::selection {
-  background-color: #0d9488;
-  color: #f8fafc;
+  background-color: #4f46e5;
+  color: #e0e7ff;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.dark *:focus-visible {
+  outline-color: rgba(129, 140, 248, 0.7);
+}
+
+/* 隐藏 number input 原生 spin button，让样式统一 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* Range slider 颜色用 brand */
+input[type="range"] { accent-color: #6366f1; }
+.dark input[type="range"] { accent-color: #818cf8; }
+
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.45); background-clip: content-box; border: 2px solid transparent; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(129, 140, 248, 0.25); background-clip: content-box; border: 2px solid transparent; }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, 0.45); background-clip: content-box; border: 2px solid transparent; }
+
+/* 卡片高光扫过（仅 hoverable card 应用） */
+.card-shine-on-hover { position: relative; overflow: hidden; }
+.card-shine-on-hover::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 35%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+  transform: translateX(-100%) skewX(-12deg);
+  pointer-events: none;
+  opacity: 0;
+}
+.card-shine-on-hover:hover::before {
+  animation: cardShine 1.2s ease-out;
+}
+.dark .card-shine-on-hover::before {
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.10), transparent);
+}
+
+/* prefers-reduced-motion 兜底 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

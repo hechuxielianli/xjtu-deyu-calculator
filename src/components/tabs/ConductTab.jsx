@@ -9,7 +9,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="📋" title="品行素质分" subtitle="基准分 + 集体活动 + 思政学习 + 社会服务 − 扣分" score={scores.conduct.total} maxScore={80} color="teal" />
+      <SectionTitle icon="📋" title="品行素质分" subtitle="基准分 + 集体活动 + 思政学习 + 社会服务 − 扣分" score={scores.conduct.total} maxScore={80} color="conduct" />
 
       <Card>
         <div className="flex items-center justify-between gap-2">
@@ -18,7 +18,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">经班级评议合格、书院审定通过</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge color={basePass ? "emerald" : "red"}>{basePass ? "+70" : "0"}</Badge>
+            <Badge color={basePass ? "success" : "danger"}>{basePass ? "+70" : "0"}</Badge>
             <Checkbox checked={basePass} onChange={setBasePass} label="" />
           </div>
         </div>
@@ -26,8 +26,8 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
 
       <Card>
         <div className="flex items-center justify-between mb-3 gap-2">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分<RuleTooltip content={TOOLTIP_COLLECTIVE} /> <Badge color="teal">上限 3</Badge></h3>
-          <Badge color={collectiveOutstanding ? "emerald" : "slate"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分<RuleTooltip content={TOOLTIP_COLLECTIVE} /> <Badge color="conduct">上限 3</Badge></h3>
+          <Badge color={collectiveOutstanding ? "success" : "neutral"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
         </div>
         <Checkbox checked={collectiveOutstanding} onChange={setCollectiveOutstanding} label="对集体荣誉有突出贡献（一次性获满分 3 分）" />
         {!collectiveOutstanding && (
@@ -53,12 +53,12 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
                 </div>
                 <div className="text-xs px-3 py-2 rounded-lg text-slate-500 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/50">
                   {collectiveCount} × {collectivePerActivity} = {(collectiveCount * collectivePerActivity).toFixed(1)}
-                  {collectiveCount * collectivePerActivity > 3 && <span className="text-amber-600 dark:text-amber-400 font-medium ml-2">→ 封顶 3.0</span>}
+                  {collectiveCount * collectivePerActivity > 3 && <span className="text-reward-600 dark:text-reward-300 font-medium ml-2">→ 封顶 3.0</span>}
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <input type="range" min={0} max={3} step={0.1} value={collectiveManual} onChange={e => setCollectiveManual(Number(e.target.value))} className="flex-1 accent-teal-500" />
+                <input type="range" min={0} max={3} step={0.1} value={collectiveManual} onChange={e => setCollectiveManual(Number(e.target.value))} className="flex-1 accent-brand-500" />
                 <span className="font-mono text-sm w-10 text-right font-semibold text-slate-700 dark:text-slate-200">{collectiveManual.toFixed(1)}</span>
               </div>
             )}
@@ -67,7 +67,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分<RuleTooltip content={TOOLTIP_POLITICAL} /> <Badge color="teal">上限 3</Badge></h3>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分<RuleTooltip content={TOOLTIP_POLITICAL} /> <Badge color="conduct">上限 3</Badge></h3>
         <div className="space-y-2.5">
           <Checkbox checked={politicalStudy.basic} onChange={v => setPoliticalStudy(p => ({ ...p, basic: v }))} label="参加党团组织理论学习培训（含网络学习）(+1)" />
           <Checkbox checked={politicalStudy.provincial} onChange={v => setPoliticalStudy(p => ({ ...p, provincial: v }))} label="参加省、部级理论学习培训 (+2)" />
@@ -78,15 +78,15 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
             label="获得优秀学员 (额外+1，需先参加培训)" />
         </div>
         {politicalStudy.outstanding && !(politicalStudy.basic || politicalStudy.provincial) && (
-          <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+          <p className="mt-2 text-xs text-reward-600 dark:text-reward-300">
             "优秀学员"需先参加至少一项培训才能计入分数。
           </p>
         )}
-        <div className="mt-2 text-right"><Badge color="teal">+{scores.conduct.political.toFixed(1)}</Badge></div>
+        <div className="mt-2 text-right"><Badge color="conduct">+{scores.conduct.political.toFixed(1)}</Badge></div>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分<RuleTooltip content={TOOLTIP_SOCIAL} /> <Badge color="teal">上限 4</Badge></h3>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分<RuleTooltip content={TOOLTIP_SOCIAL} /> <Badge color="conduct">上限 4</Badge></h3>
         <Field label="志愿服务时长（小时/学年）" hint="≥32h 得 1 分，不足按比例">
           <div className="flex items-center gap-3">
             <NumberInput value={socialService.volunteerHours} onChange={v => setSocialService(p => ({ ...p, volunteerHours: v }))} max={200} />
@@ -110,18 +110,18 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
                 onChange={v => setSocialService(p => ({ ...p, advancedIndividual: v }))}
                 label="获先进个人及表彰 (额外+1，需先参加服务)" />
               {socialService.advancedIndividual && !hasAnyService && (
-                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                <p className="mt-2 text-xs text-reward-600 dark:text-reward-300">
                   "先进个人"需先参加任一社会服务项目才能计入分数。
                 </p>
               )}
             </>
           );
         })()}
-        <div className="mt-2 text-right"><Badge color="teal">+{scores.conduct.social.toFixed(1)}</Badge></div>
+        <div className="mt-2 text-right"><Badge color="conduct">+{scores.conduct.social.toFixed(1)}</Badge></div>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项<RuleTooltip content={TOOLTIP_PENALTY} /> <Badge color="red">不设上限</Badge></h3>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项<RuleTooltip content={TOOLTIP_PENALTY} /> <Badge color="danger">不设上限</Badge></h3>
         <CollapsibleList
           items={penalties}
           threshold={3}
@@ -140,7 +140,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
           )}
           renderAdd={() => <AddButton onClick={() => setPenalties(ps => [...ps, { type: 0, count: 1 }])} label="添加扣分项" />}
         />
-        {scores.conduct.penalty > 0 && <div className="mt-2 text-right"><Badge color="red">−{scores.conduct.penalty.toFixed(1)}</Badge></div>}
+        {scores.conduct.penalty > 0 && <div className="mt-2 text-right"><Badge color="danger">−{scores.conduct.penalty.toFixed(1)}</Badge></div>}
       </Card>
     </div>
   );
