@@ -20,3 +20,16 @@ Thumbs.db
 
 # 课程实验报告（仅本地保留，不上传仓库）
 实验报告.md
+
+# LaTeX 实验报告（仅本地保留，严禁上传仓库）
+report/
+*.pdf
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
