@@ -1,6 +1,6 @@
 import { Card, cn } from "./ui";
 import { ScoreChart } from "./ScoreChart";
-import { IconShare } from "./icons";
+import { IconShare, IconSigma } from "./icons";
 
 export function ScoreSummary({ scores, onExport, variant = "floating", className }) {
   const isSidebar = variant === "sidebar";
@@ -11,8 +11,8 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
       className,
     )}>
       <Card hoverable accent="brand" className="bg-gradient-to-br from-white/80 to-brand-50/40 dark:from-slate-900/60 dark:to-brand-950/30">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1 flex items-center gap-2">
-          <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center text-xs">∑</span>
+        <h3 className="text-[15px] font-semibold text-slate-800 dark:text-slate-100 mb-1 flex items-center gap-2">
+          <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center"><IconSigma className="w-3.5 h-3.5" /></span>
           得分汇总
         </h3>
         <ScoreChart scores={scores} />
@@ -36,7 +36,7 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
           </div>
           <div className="border-t pt-2 flex justify-between items-baseline border-slate-200/80 dark:border-white/10">
             <span className="font-semibold text-slate-800 dark:text-slate-100">总分</span>
-            <span className="font-mono text-2xl font-bold bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-300 dark:to-accent-300 bg-clip-text text-transparent">{scores.total.toFixed(1)}</span>
+            <span className="font-mono text-2xl font-bold tabular-nums text-brand-700 dark:text-brand-300">{scores.total.toFixed(1)}</span>
           </div>
         </div>
       </Card>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, Badge, SectionTitle, Select, Checkbox, cn } from "../ui";
-import { IconX } from "../icons";
+import { IconX, IconCalculator } from "../icons";
 import {
   recommend, CANDIDATES, isCandidateReasonable,
   isCandidateAvailable, achievedCandidateIds,
@@ -55,7 +55,7 @@ function ResultBody({ result, onExclude, fadingId }) {
       <div className="grid grid-cols-3 gap-2 mb-4 text-center">
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">目标分差</div>
-          <div className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">+{result.gap.toFixed(1)}</div>
+          <div className="font-mono text-[15px] font-semibold text-slate-700 dark:text-slate-200">+{result.gap.toFixed(1)}</div>
         </div>
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">实际增量</div>
@@ -182,18 +182,18 @@ export function RecommenderTab({ scores, state }) {
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="🧮" title="目标分推荐器" subtitle="推荐最经济的加分组合" score={scores.total} maxScore={105} color="brand" />
+      <SectionTitle icon={<IconCalculator className="w-[18px] h-[18px]" />} title="目标分推荐器" subtitle="推荐最经济的加分组合" score={scores.total} maxScore={105} color="brand" />
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">设置目标</h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">设置目标</h3>
         <div className="mb-3">
           <div className="flex items-baseline justify-between mb-2">
             <span className="text-xs text-slate-500 dark:text-slate-400">当前总分</span>
-            <span className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">{scores.total.toFixed(1)} / 105</span>
+            <span className="font-mono text-[15px] font-semibold text-slate-700 dark:text-slate-200">{scores.total.toFixed(1)} / 105</span>
           </div>
           <div className="flex items-baseline justify-between mb-2">
             <span className="text-xs text-slate-500 dark:text-slate-400">目标总分</span>
-            <span className="font-mono text-base font-bold bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-300 dark:to-accent-300 bg-clip-text text-transparent">{target.toFixed(1)}</span>
+            <span className="font-mono text-base font-bold tabular-nums text-brand-700 dark:text-brand-300">{target.toFixed(1)}</span>
           </div>
           <input type="range" min={Math.ceil(scores.total)} max={105} step={0.5} value={target}
             onChange={e => setTarget(Number(e.target.value))}
@@ -277,7 +277,7 @@ export function RecommenderTab({ scores, state }) {
 
       {result && result.feasible && result.selected.length > 0 && (
         <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
+          <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
           <ResultBody result={result} onExclude={onExclude} fadingId={fadingId} />
         </Card>
       )}
@@ -285,7 +285,7 @@ export function RecommenderTab({ scores, state }) {
       <Card>
         <details open className="group">
           <summary className="cursor-pointer flex items-center gap-2 select-none list-none">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">我的现状</h3>
+            <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">我的现状</h3>
             <span className="text-xs text-slate-400 dark:text-slate-500">
               {contextFilledCount > 0 ? `已填 ${contextFilledCount}/6 项` : "可选 · 填写后推荐更贴合实际"}
             </span>

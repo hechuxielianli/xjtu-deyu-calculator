@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TabNav } from "./components/ui";
-import { IconSun, IconMoon, IconShare } from "./components/icons";
+import { IconSun, IconMoon, IconShare, IconShieldCheck, IconAward, IconStar, IconCalculator } from "./components/icons";
 import { ConductTab } from "./components/tabs/ConductTab";
 import { AbilityTab } from "./components/tabs/AbilityTab";
 import { RewardTab } from "./components/tabs/RewardTab";
@@ -51,7 +51,7 @@ export default function App() {
   return (
     <div className={dark ? "dark" : ""}>
       <div style={{ fontFamily: "'Noto Sans SC','PingFang SC',-apple-system,sans-serif" }}
-        className="min-h-screen relative transition-colors bg-gradient-to-br from-slate-50 via-indigo-50/40 to-violet-50/30 dark:from-slate-950 dark:via-indigo-950/40 dark:to-slate-900">
+        className="min-h-screen relative transition-colors bg-gradient-to-br from-slate-50 via-brand-50/40 to-slate-100 dark:from-slate-950 dark:via-brand-950/30 dark:to-slate-900">
 
         <BackgroundDecoration dark={dark} />
 
@@ -66,7 +66,7 @@ export default function App() {
                   className="hidden sm:block w-9 h-9 rounded-xl object-contain shadow-lg shadow-brand-500/20 bg-white/70 dark:bg-white/90 p-1 ring-1 ring-white/60 dark:ring-white/20"
                 />
                 <div className="min-w-0">
-                  <h1 className="text-sm sm:text-base lg:text-lg font-bold tracking-tight truncate text-slate-800 dark:text-slate-100">西安交通大学 · 综合素质测评计算器</h1>
+                  <h1 className="text-base sm:text-lg lg:text-xl font-bold tracking-tight truncate text-slate-800 dark:text-slate-100">西安交通大学 · 综合素质测评计算器</h1>
                   <p className="text-xs truncate text-slate-500 dark:text-slate-400 hidden sm:block">依据《本科生专业选择综合素质测评内容及评分标准》</p>
                 </div>
               </div>
@@ -98,10 +98,10 @@ export default function App() {
         {/* ── MAIN ── */}
         <div className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 lg:py-7 pb-20">
           <TabNav className="lg:max-w-2xl" active={tab} onChange={setTab} tabs={[
-            { key: "conduct", icon: "🎯", label: "品行素质" },
-            { key: "ability", icon: "🏆", label: "能力拓展" },
-            { key: "reward", icon: "⭐", label: "奖励分" },
-            { key: "recommender", icon: "🧮", label: "目标推荐" },
+            { key: "conduct", icon: <IconShieldCheck className="w-3.5 h-3.5" />, label: "品行素质" },
+            { key: "ability", icon: <IconAward className="w-3.5 h-3.5" />, label: "能力拓展" },
+            { key: "reward", icon: <IconStar className="w-3.5 h-3.5" />, label: "奖励分" },
+            { key: "recommender", icon: <IconCalculator className="w-3.5 h-3.5" />, label: "目标推荐" },
           ]} />
 
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">

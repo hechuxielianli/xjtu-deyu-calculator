@@ -14,8 +14,8 @@ export function Card({ children, className, hoverable = false, accent }) {
   return (
     <div className={cn(
       "relative rounded-2xl border p-4 sm:p-5 transition-all duration-300",
-      "border-white/60 dark:border-white/10",
-      "bg-white/70 dark:bg-slate-900/50",
+      "border-white/70 dark:border-white/10",
+      "bg-white/85 dark:bg-slate-900/60",
       "backdrop-blur-xl dark:backdrop-blur-2xl",
       "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.10)]",
       "dark:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_8px_32px_-12px_rgba(0,0,0,0.6)]",
@@ -49,15 +49,23 @@ const BAR_COLORS = {
   brand:   "bg-gradient-to-r from-brand-400   to-brand-600   dark:from-brand-400   dark:to-brand-500",
 };
 
+const ICON_CHIP = {
+  conduct: "bg-conduct-100/70 text-conduct-700 dark:bg-conduct-900/40 dark:text-conduct-300",
+  ability: "bg-ability-100/70 text-ability-700 dark:bg-ability-900/40 dark:text-ability-300",
+  reward:  "bg-reward-100/70  text-reward-700  dark:bg-reward-900/40  dark:text-reward-300",
+  brand:   "bg-brand-100/70   text-brand-700   dark:bg-brand-900/40   dark:text-brand-300",
+};
+
 export function SectionTitle({ icon, title, subtitle, score, maxScore, color }) {
+  const chip = ICON_CHIP[color] || ICON_CHIP.brand;
   return (
     <div className="mb-4">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-lg">{icon}</span>
-        <h2 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
-        <span className="ml-auto font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{maxScore}</span></span>
+      <div className="flex items-center gap-2.5 mb-1.5">
+        <span className={cn("inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0", chip)}>{icon}</span>
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">{title}</h2>
+        <span className="ml-auto font-mono text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{maxScore}</span></span>
       </div>
-      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-7">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-[2.625rem]">{subtitle}</p>}
       <div className="h-1.5 rounded-full bg-slate-200/70 dark:bg-slate-700/60 overflow-hidden">
         <div className={cn("h-full rounded-full transition-all duration-500 ease-out", BAR_COLORS[color] || BAR_COLORS.brand)} style={{ width: `${Math.min(100, (score / maxScore) * 100)}%` }} />
       </div>
@@ -76,12 +84,12 @@ export function Field({ label, children, hint }) {
 }
 
 const FIELD_CLASS = cn(
-  "w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all",
-  "border-slate-200/80 bg-white/60 text-slate-700 backdrop-blur-sm",
-  "hover:border-slate-300 hover:bg-white/80",
-  "focus:border-brand-400 focus:ring-2 focus:ring-brand-400/40 focus:bg-white",
-  "dark:border-slate-600/70 dark:bg-slate-800/50 dark:text-slate-200",
-  "dark:hover:border-slate-500 dark:hover:bg-slate-800/70",
+  "w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200",
+  "border-slate-300/80 bg-white/85 text-slate-700",
+  "hover:border-slate-400 hover:bg-white",
+  "focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:bg-white",
+  "dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200",
+  "dark:hover:border-slate-500 dark:hover:bg-slate-800/90",
   "dark:focus:border-brand-400 dark:focus:ring-brand-400/30 dark:focus:bg-slate-800",
 );
 
@@ -218,12 +226,12 @@ export function TabNav({ active, onChange, tabs, className }) {
       {tabs.map(t => (
         <button key={t.key} onClick={() => onChange(t.key)}
           className={cn(
-            "relative z-10 flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-colors duration-200",
+            "relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-colors duration-200",
             active === t.key
-              ? "text-slate-800 dark:text-slate-100"
+              ? "text-brand-700 dark:text-brand-200"
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
           )}>
-          <span className="mr-1">{t.icon}</span>{t.label}
+          <span className="shrink-0">{t.icon}</span><span>{t.label}</span>
         </button>
       ))}
     </div>

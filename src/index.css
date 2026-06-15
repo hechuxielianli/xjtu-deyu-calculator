@@ -3,101 +3,101 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* ── Brand / Accent (Aurora 极光蓝紫) ── */
-  --color-brand-50:  #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
-  --color-brand-950: #1e1b4b;
+  /* ── Brand (交大蓝) / Accent (暖金) — Ink & Gold ── */
+  --color-brand-50:  #eff4f9;
+  --color-brand-100: #dbe7f2;
+  --color-brand-200: #bcd0e5;
+  --color-brand-300: #8fb0ce;
+  --color-brand-400: #5c87b2;
+  --color-brand-500: #2f6499;
+  --color-brand-600: #1f4e79;
+  --color-brand-700: #163a5c;
+  --color-brand-800: #122f49;
+  --color-brand-900: #0f2638;
+  --color-brand-950: #091824;
 
-  --color-accent-50:  #f5f3ff;
-  --color-accent-100: #ede9fe;
-  --color-accent-200: #ddd6fe;
-  --color-accent-300: #c4b5fd;
-  --color-accent-400: #a78bfa;
-  --color-accent-500: #8b5cf6;
-  --color-accent-600: #7c3aed;
-  --color-accent-700: #6d28d9;
-  --color-accent-800: #5b21b6;
-  --color-accent-900: #4c1d95;
-  --color-accent-950: #2e1065;
+  --color-accent-50:  #fbf5e8;
+  --color-accent-100: #f4e7c3;
+  --color-accent-200: #e9d08f;
+  --color-accent-300: #e0c074;
+  --color-accent-400: #d3a948;
+  --color-accent-500: #c99a2e;
+  --color-accent-600: #ae831f;
+  --color-accent-700: #8b6819;
+  --color-accent-800: #654c13;
+  --color-accent-900: #43330d;
+  --color-accent-950: #271e07;
 
   /* ── 三模块语义色 ── */
-  /* 品行 = sky */
-  --color-conduct-50:  #f0f9ff;
-  --color-conduct-100: #e0f2fe;
-  --color-conduct-200: #bae6fd;
-  --color-conduct-300: #7dd3fc;
-  --color-conduct-400: #38bdf8;
-  --color-conduct-500: #0ea5e9;
-  --color-conduct-600: #0284c7;
-  --color-conduct-700: #0369a1;
-  --color-conduct-800: #075985;
-  --color-conduct-900: #0c4a6e;
-  --color-conduct-950: #082f49;
+  /* 品行 = 靖蓝 */
+  --color-conduct-50:  #eff5fb;
+  --color-conduct-100: #dae8f6;
+  --color-conduct-200: #b7d0ec;
+  --color-conduct-300: #88aed6;
+  --color-conduct-400: #5a90cd;
+  --color-conduct-500: #3b77bf;
+  --color-conduct-600: #2e6fb7;
+  --color-conduct-700: #235a9c;
+  --color-conduct-800: #1b4778;
+  --color-conduct-900: #15375c;
+  --color-conduct-950: #0e2440;
 
-  /* 能力 = fuchsia */
-  --color-ability-50:  #fdf4ff;
-  --color-ability-100: #fae8ff;
-  --color-ability-200: #f5d0fe;
-  --color-ability-300: #f0abfc;
-  --color-ability-400: #e879f9;
-  --color-ability-500: #d946ef;
-  --color-ability-600: #c026d3;
-  --color-ability-700: #a21caf;
-  --color-ability-800: #86198f;
-  --color-ability-900: #701a75;
-  --color-ability-950: #4a044e;
+  /* 能力 = 青 teal */
+  --color-ability-50:  #ecf7f8;
+  --color-ability-100: #cbebef;
+  --color-ability-200: #9bd9df;
+  --color-ability-300: #66bfc8;
+  --color-ability-400: #4db2bf;
+  --color-ability-500: #36a0ae;
+  --color-ability-600: #2f8f9d;
+  --color-ability-700: #25707c;
+  --color-ability-800: #1e5862;
+  --color-ability-900: #18454d;
+  --color-ability-950: #0e2a30;
 
-  /* 奖励 = amber */
-  --color-reward-50:  #fffbeb;
-  --color-reward-100: #fef3c7;
-  --color-reward-200: #fde68a;
-  --color-reward-300: #fcd34d;
-  --color-reward-400: #fbbf24;
-  --color-reward-500: #f59e0b;
-  --color-reward-600: #d97706;
-  --color-reward-700: #b45309;
-  --color-reward-800: #92400e;
-  --color-reward-900: #78350f;
-  --color-reward-950: #451a03;
+  /* 奖励 = 暖金（与 accent 同族）*/
+  --color-reward-50:  #fbf5e8;
+  --color-reward-100: #f4e7c3;
+  --color-reward-200: #e9d08f;
+  --color-reward-300: #e0c074;
+  --color-reward-400: #d3a948;
+  --color-reward-500: #c99a2e;
+  --color-reward-600: #ae831f;
+  --color-reward-700: #8b6819;
+  --color-reward-800: #654c13;
+  --color-reward-900: #43330d;
+  --color-reward-950: #271e07;
 
-  /* 危险 = red */
-  --color-danger-50:  #fef2f2;
-  --color-danger-100: #fee2e2;
-  --color-danger-200: #fecaca;
-  --color-danger-300: #fca5a5;
-  --color-danger-400: #f87171;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
-  --color-danger-700: #b91c1c;
-  --color-danger-800: #991b1b;
-  --color-danger-900: #7f1d1d;
-  --color-danger-950: #450a0a;
+  /* 危险 = 暗红 */
+  --color-danger-50:  #fbefee;
+  --color-danger-100: #f6d9d7;
+  --color-danger-200: #edb7b4;
+  --color-danger-300: #e29b98;
+  --color-danger-400: #d2716d;
+  --color-danger-500: #c0504d;
+  --color-danger-600: #a53f3d;
+  --color-danger-700: #843230;
+  --color-danger-800: #602623;
+  --color-danger-900: #401a18;
+  --color-danger-950: #260f0e;
 
-  /* 成功 = emerald */
-  --color-success-50:  #ecfdf5;
-  --color-success-100: #d1fae5;
-  --color-success-200: #a7f3d0;
-  --color-success-300: #6ee7b7;
-  --color-success-400: #34d399;
-  --color-success-500: #10b981;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
-  --color-success-800: #065f46;
-  --color-success-900: #064e3b;
-  --color-success-950: #022c22;
+  /* 成功 = 暗绿 */
+  --color-success-50:  #eef6f1;
+  --color-success-100: #d6ebde;
+  --color-success-200: #aed7c0;
+  --color-success-300: #8cc4a4;
+  --color-success-400: #69ae85;
+  --color-success-500: #4e9a6b;
+  --color-success-600: #3e7e57;
+  --color-success-700: #316345;
+  --color-success-800: #254b34;
+  --color-success-900: #1b3727;
+  --color-success-950: #0f2016;
 
   /* ── 玻璃 / 阴影 / 圆角 ── */
   --shadow-glass-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -6px rgba(15, 23, 42, 0.06);
   --shadow-glass-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.10);
-  --shadow-glass-lg: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 40px -16px rgba(79, 70, 229, 0.18);
+  --shadow-glass-lg: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 40px -16px rgba(31, 78, 121, 0.20);
 
   --radius-card:     1rem;
   --radius-card-lg:  1.25rem;
@@ -142,23 +142,23 @@ html {
 }
 
 ::selection {
-  background-color: #c7d2fe;
-  color: #1e1b4b;
+  background-color: #bcd0e5;
+  color: #091824;
 }
 
 .dark ::selection {
-  background-color: #4f46e5;
-  color: #e0e7ff;
+  background-color: #1f4e79;
+  color: #dbe7f2;
 }
 
 *:focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline: 2px solid rgba(31, 78, 121, 0.6);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 .dark *:focus-visible {
-  outline-color: rgba(129, 140, 248, 0.7);
+  outline-color: rgba(92, 135, 178, 0.75);
 }
 
 /* 隐藏 number input 原生 spin button，让样式统一 */
@@ -169,22 +169,22 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] { -moz-appearance: textfield; }
 
-/* Range slider 颜色用 brand */
-input[type="range"] { accent-color: #6366f1; }
-.dark input[type="range"] { accent-color: #818cf8; }
+/* Range slider 颜色用 brand 交大蓝 */
+input[type="range"] { accent-color: #1f4e79; }
+.dark input[type="range"] { accent-color: #5c87b2; }
 
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.25);
+  background: rgba(31, 78, 121, 0.30);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.45); background-clip: content-box; border: 2px solid transparent; }
-.dark ::-webkit-scrollbar-thumb { background: rgba(129, 140, 248, 0.25); background-clip: content-box; border: 2px solid transparent; }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, 0.45); background-clip: content-box; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 78, 121, 0.50); background-clip: content-box; border: 2px solid transparent; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(92, 135, 178, 0.28); background-clip: content-box; border: 2px solid transparent; }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(92, 135, 178, 0.48); background-clip: content-box; border: 2px solid transparent; }
 
 /* 卡片高光扫过（仅 hoverable card 应用） */
 .card-shine-on-hover { position: relative; overflow: hidden; }

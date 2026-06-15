@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { IconX, IconCamera, IconPrinter } from "./icons";
+import { IconX, IconCamera, IconPrinter, IconArrowUpRight } from "./icons";
 
 // ── Canvas 用色镜像（与 src/index.css 的 @theme 保持一致） ──
 // Tailwind class 在 Canvas 中无效，所以单独维护一份十六进制色镜像
@@ -14,12 +14,12 @@ const EXPORT_COLORS = {
     track:   "#e2e8f0",  // 进度条底色
     dots:    "#cbd5e1",  // slate-300
     subBg:   "#f8fafc",
-    conduct: "#0284c7",  // sky-600
-    ability: "#c026d3",  // fuchsia-600
-    reward:  "#f59e0b",  // amber-500
-    danger:  "#dc2626",  // red-600
-    brand:   "#6366f1",  // indigo-500
-    accent:  "#8b5cf6",  // violet-500
+    conduct: "#2e6fb7",  // 靖蓝 conduct-600
+    ability: "#2f8f9d",  // 青 teal ability-600
+    reward:  "#c99a2e",  // 暖金 reward-500
+    danger:  "#c0504d",  // 暗红 danger-500
+    brand:   "#1f4e79",  // 交大蓝 brand-600
+    accent:  "#c99a2e",  // 暖金 accent-500
   },
   dark: {
     bg:      "#020617",  // slate-950
@@ -31,12 +31,12 @@ const EXPORT_COLORS = {
     track:   "#334155",
     dots:    "#475569",  // slate-600
     subBg:   "#0f172a",
-    conduct: "#38bdf8",  // sky-400
-    ability: "#e879f9",  // fuchsia-400
-    reward:  "#fcd34d",  // amber-300
-    danger:  "#f87171",  // red-400
-    brand:   "#818cf8",  // indigo-400
-    accent:  "#a78bfa",  // violet-400
+    conduct: "#88aed6",  // 靖蓝 conduct-300
+    ability: "#66bfc8",  // 青 teal ability-300
+    reward:  "#e0c074",  // 暖金 reward-300
+    danger:  "#e29b98",  // 暗红 danger-300
+    brand:   "#8fb0ce",  // 交大蓝 brand-300
+    accent:  "#e0c074",  // 暖金 accent-300
   },
 };
 
@@ -218,8 +218,8 @@ export function ExportModal({ scores, isDark, onClose }) {
       <div className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col motion-safe:animate-[fadeInUp_0.24s_ease-out]"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/60 dark:border-white/10 shrink-0">
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center text-xs">↗</span>
+          <h3 className="text-[15px] font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center"><IconArrowUpRight className="w-3.5 h-3.5" /></span>
             导出得分
           </h3>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition"><IconX /></button>

@@ -1,4 +1,5 @@
 import { Card, Badge, SectionTitle, Field, Select, Checkbox, AddButton, DynamicItem } from "../ui";
+import { IconAward } from "../icons";
 import { RuleTooltip, TOOLTIP_ACADEMIC, TOOLTIP_PAPER, TOOLTIP_ART, TOOLTIP_SPORT, TOOLTIP_ORG } from "../RuleTooltip";
 import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
 import { ACADEMIC_COMP, PAPER_SCORES, ART_COMP, SPORT_COMP, ORG_LEVELS } from "../../data/constants";
@@ -9,12 +10,14 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="🏆" title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="ability" />
+      <SectionTitle icon={<IconAward className="w-[18px] h-[18px]" />} title="能力拓展分" subtitle="学术科研（10）+ 文体竞赛（6）+ 组织任职（4）" score={scores.ability.total} maxScore={20} color="ability" />
 
-      <div className="rounded-2xl border border-ability-200/50 bg-ability-50/30 dark:border-ability-700/30 dark:bg-ability-950/20 backdrop-blur-sm p-2 sm:p-3 space-y-3">
-        <Card>
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学科/科技竞赛获奖<RuleTooltip content={TOOLTIP_ACADEMIC} /></h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
+      <Card>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">学科/科技竞赛获奖<RuleTooltip content={TOOLTIP_ACADEMIC} /></h3>
+          <Badge color="ability">学术 {scores.ability.academic.toFixed(1)}/10</Badge>
+        </div>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
           <CollapsibleList
             items={academicComps}
             threshold={3}
@@ -37,11 +40,11 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
             )}
             renderAdd={() => <AddButton onClick={() => setAcademicComps(cs => [...cs, { level: "national", award: "first" }])} label="添加竞赛获奖" />}
           />
-        </Card>
 
-        <Card>
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著<RuleTooltip content={TOOLTIP_PAPER} /></h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
+        <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
+
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著<RuleTooltip content={TOOLTIP_PAPER} /></h3>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
           <CollapsibleList
             items={papers}
             threshold={3}
@@ -64,13 +67,10 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
             )}
             renderAdd={() => <AddButton onClick={() => setPapers(ps => [...ps, { type: "intl_journal", authorRank: 1, outstandingPaper: false }])} label="添加论文/专利" />}
           />
-        </Card>
-
-        <div className="mt-1 pr-2 text-right"><Badge color="ability">学术: {scores.ability.academic.toFixed(1)}/10</Badge></div>
-      </div>
+      </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛<RuleTooltip content={TOOLTIP_ART} /></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛<RuleTooltip content={TOOLTIP_ART} /></h3>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">文体合计上限 6 分</p>
         <CollapsibleList
           items={artComps}
@@ -97,7 +97,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
 
         <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
 
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛<RuleTooltip content={TOOLTIP_SPORT} /></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">体育竞赛<RuleTooltip content={TOOLTIP_SPORT} /></h3>
         <CollapsibleList
           items={sportComps}
           threshold={3}
@@ -127,7 +127,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="ability">上限 4</Badge></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="ability">上限 4</Badge></h3>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">多职务以最高分计，不累加</p>
         <Field label="最高职务级别">
           <Select value={orgPosition.level} onChange={v => setOrgPosition(p => ({ ...p, level: Number(v) }))}

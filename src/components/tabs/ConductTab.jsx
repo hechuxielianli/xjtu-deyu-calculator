@@ -1,4 +1,5 @@
 import { Card, Badge, SectionTitle, Field, Select, NumberInput, Checkbox, AddButton, DynamicItem, cn } from "../ui";
+import { IconShieldCheck } from "../icons";
 import { RuleTooltip, TOOLTIP_BASE, TOOLTIP_COLLECTIVE, TOOLTIP_POLITICAL, TOOLTIP_SOCIAL, TOOLTIP_PENALTY } from "../RuleTooltip";
 import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
 import { PENALTY_TYPES } from "../../data/constants";
@@ -9,12 +10,12 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
 
   return (
     <div className="space-y-4">
-      <SectionTitle icon="📋" title="品行素质分" subtitle="基准分 + 集体活动 + 思政学习 + 社会服务 − 扣分" score={scores.conduct.total} maxScore={80} color="conduct" />
+      <SectionTitle icon={<IconShieldCheck className="w-[18px] h-[18px]" />} title="品行素质分" subtitle="基准分 + 集体活动 + 思政学习 + 社会服务 − 扣分" score={scores.conduct.total} maxScore={80} color="conduct" />
 
       <Card>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">基准分<RuleTooltip content={TOOLTIP_BASE} /></h3>
+            <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">基准分<RuleTooltip content={TOOLTIP_BASE} /></h3>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">经班级评议合格、书院审定通过</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -26,7 +27,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
 
       <Card>
         <div className="flex items-center justify-between mb-3 gap-2">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">集体活动分<RuleTooltip content={TOOLTIP_COLLECTIVE} /> <Badge color="conduct">上限 3</Badge></h3>
+          <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">集体活动分<RuleTooltip content={TOOLTIP_COLLECTIVE} /> <Badge color="conduct">上限 3</Badge></h3>
           <Badge color={collectiveOutstanding ? "success" : "neutral"}>{collectiveOutstanding ? "满分" : `+${scores.conduct.collective.toFixed(1)}`}</Badge>
         </div>
         <Checkbox checked={collectiveOutstanding} onChange={setCollectiveOutstanding} label="对集体荣誉有突出贡献（一次性获满分 3 分）" />
@@ -67,7 +68,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分<RuleTooltip content={TOOLTIP_POLITICAL} /> <Badge color="conduct">上限 3</Badge></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">思政学习分<RuleTooltip content={TOOLTIP_POLITICAL} /> <Badge color="conduct">上限 3</Badge></h3>
         <div className="space-y-2.5">
           <Checkbox checked={politicalStudy.basic} onChange={v => setPoliticalStudy(p => ({ ...p, basic: v }))} label="参加党团组织理论学习培训（含网络学习）(+1)" />
           <Checkbox checked={politicalStudy.provincial} onChange={v => setPoliticalStudy(p => ({ ...p, provincial: v }))} label="参加省、部级理论学习培训 (+2)" />
@@ -86,7 +87,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分<RuleTooltip content={TOOLTIP_SOCIAL} /> <Badge color="conduct">上限 4</Badge></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">社会服务分<RuleTooltip content={TOOLTIP_SOCIAL} /> <Badge color="conduct">上限 4</Badge></h3>
         <Field label="志愿服务时长（小时/学年）" hint="≥32h 得 1 分，不足按比例">
           <div className="flex items-center gap-3">
             <NumberInput value={socialService.volunteerHours} onChange={v => setSocialService(p => ({ ...p, volunteerHours: v }))} max={200} />
@@ -121,7 +122,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项<RuleTooltip content={TOOLTIP_PENALTY} /> <Badge color="danger">不设上限</Badge></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">扣分项<RuleTooltip content={TOOLTIP_PENALTY} /> <Badge color="danger">不设上限</Badge></h3>
         <CollapsibleList
           items={penalties}
           threshold={3}

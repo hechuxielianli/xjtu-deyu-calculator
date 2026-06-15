@@ -1,4 +1,5 @@
 import { Card, SectionTitle, Field, Select, NumberInput, AddButton, DynamicItem } from "../ui";
+import { IconStar } from "../icons";
 import { RuleTooltip, TOOLTIP_HONOR, TOOLTIP_DEEDS } from "../RuleTooltip";
 import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
 import { HONOR_LEVELS } from "../../data/constants";
@@ -6,9 +7,9 @@ import { HONOR_LEVELS } from "../../data/constants";
 export function RewardTab({ scores, honors, setHonors, goodDeeds, setGoodDeeds }) {
   return (
     <div className="space-y-4">
-      <SectionTitle icon="⭐" title="奖励分" subtitle="荣誉表彰 + 好人好事，累加上限 5 分" score={scores.reward.total} maxScore={5} color="reward" />
+      <SectionTitle icon={<IconStar className="w-[18px] h-[18px]" />} title="奖励分" subtitle="荣誉表彰 + 好人好事，累加上限 5 分" score={scores.reward.total} maxScore={5} color="reward" />
       <Card>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">荣誉表彰<RuleTooltip content={TOOLTIP_HONOR} /></h3>
+        <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">荣誉表彰<RuleTooltip content={TOOLTIP_HONOR} /></h3>
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
           包含精神文明荣誉、见义勇为 / 勇斗歹徒 / 舍己救人 / 拾金不昧表彰等。两类独立累加，与好人好事合计 ≤ 5 分。
         </p>
