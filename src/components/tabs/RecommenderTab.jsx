@@ -3,6 +3,7 @@ import { Card, Badge, SectionTitle, Select, Checkbox, cn } from "../ui";
 import { IconX } from "../icons";
 import {
   recommend, CANDIDATES, isCandidateReasonable,
+  isCandidateAvailable, achievedCandidateIds,
   USER_CONTEXT_DIMENSIONS, DEFAULT_USER_CONTEXT,
   complexityInfo,
 } from "../../algorithms/recommender";
@@ -25,21 +26,23 @@ function formatCost(hours) {
   return `${hours} 小时`;
 }
 
-function runRecommend(scores, target, excludedIds, includeHard, userContext) {
-  const filtered = CANDIDATES.filter(c =>
+function runRecommend(scores, target, excludedIds, includeHard, userContext, state) {
+  // 自动跳过：① 已完成的一次性项（缺陷 1）；② 前置依赖未满足、会算 0 分的无效项。
+  const achievedIds = achievedCandidateIds(state);
+  const baseFilter = c =>
     !excludedIds.has(c.id) &&
-    (includeHard || c.difficulty !== "very-hard") &&
-    isCandidateReasonable(c, userContext)
-  );
+    !achievedIds.has(c.id) &&
+    isCandidateAvailable(c, state) &&
+    isCandidateReasonable(c, userContext);
+
+  const filtered = CANDIDATES.filter(c => baseFilter(c) && (includeHard || c.difficulty !== "very-hard"));
   const result = recommend(scores, target, filtered);
   let relaxed = null;
   if (!result.feasible && !includeHard) {
-    const r = recommend(scores, target, CANDIDATES.filter(c =>
-      !excludedIds.has(c.id) && isCandidateReasonable(c, userContext)
-    ));
+    const r = recommend(scores, target, CANDIDATES.filter(baseFilter));
     if (r.feasible) relaxed = r;
   }
-  return { result, relaxed };
+  return { result, relaxed, skippedCount: achievedIds.size };
 }
 
 function ResultBody({ result, onExclude, fadingId }) {
@@ -110,10 +113,11 @@ function ResultBody({ result, onExclude, fadingId }) {
   );
 }
 
-export function RecommenderTab({ scores }) {
+export function RecommenderTab({ scores, state }) {
   const [target, setTarget] = useState(() => Math.min(105, Math.ceil(scores.total + 5)));
   const [result, setResult] = useState(null);
   const [relaxed, setRelaxed] = useState(null);
+  const [skippedCount, setSkippedCount] = useState(0);
   const [excludedIds, setExcludedIds] = useState(() => loadExcluded());
   const [includeHard, setIncludeHard] = useState(true);
   const [userContext, setUserContext] = useState(() => loadUserContext());
@@ -133,16 +137,18 @@ export function RecommenderTab({ scores }) {
 
   const compute = () => {
     hasComputedRef.current = true;
-    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard, userContext);
+    const { result: r, relaxed: rx, skippedCount: sc } = runRecommend(scores, target, excludedIds, includeHard, userContext, state);
     setResult(r);
     setRelaxed(rx);
+    setSkippedCount(sc);
   };
 
   useEffect(() => {
     if (!hasComputedRef.current) return;
-    const { result: r, relaxed: rx } = runRecommend(scores, target, excludedIds, includeHard, userContext);
+    const { result: r, relaxed: rx, skippedCount: sc } = runRecommend(scores, target, excludedIds, includeHard, userContext, state);
     setResult(r);
     setRelaxed(rx);
+    setSkippedCount(sc);
     // target 故意不在依赖里：滑块拖动不应触发自动重算
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [excludedIds, includeHard, userContext]);
@@ -240,6 +246,12 @@ export function RecommenderTab({ scores }) {
       </Card>
 
       {/* ── 推荐结果（放在配置之后、"我的现状"之前） ── */}
+      {result && skippedCount > 0 && (
+        <p className="text-xs text-slate-500 dark:text-slate-400 px-1 -mb-1">
+          已根据你当前的填写，自动跳过 <span className="font-semibold text-slate-700 dark:text-slate-200">{skippedCount}</span> 个已完成 / 不再增分的项目。
+        </p>
+      )}
+
       {result && !result.feasible && (
         <Card className="border-danger-300/70 dark:border-danger-700/50">
           <h3 className="text-sm font-semibold text-danger-700 dark:text-danger-300 mb-2">无法达成目标</h3>

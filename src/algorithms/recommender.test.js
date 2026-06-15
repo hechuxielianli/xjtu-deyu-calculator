@@ -4,6 +4,7 @@
 import {
   recommend, recommendGreedy, compareAlgorithms, CANDIDATES, complexityInfo,
   isCandidateReasonable, DEFAULT_USER_CONTEXT,
+  achievedCandidateIds, isCandidateAvailable,
 } from "./recommender.js";
 
 let passed = 0;
@@ -19,14 +20,22 @@ function assert(cond, msg) {
   }
 }
 
-function makeScores(conductTotal, academic, artSport, org, rewardTotal) {
+function makeScores(conductTotal, academic, artSport, org, rewardTotal, conduct = {}) {
   return {
-    conduct: { total: conductTotal },
+    conduct: {
+      total: conductTotal,
+      collective: conduct.collective ?? 0,
+      political: conduct.political ?? 0,
+      social: conduct.social ?? 0,
+    },
     ability: { academic, artSport, org, total: academic + artSport + org },
     reward: { total: rewardTotal },
     total: conductTotal + academic + artSport + org + rewardTotal,
   };
 }
+
+// 品行三子项全部封顶的便捷构造（集体3/思政3/社会4 → 70+10=80）
+const CONDUCT_FULL = { collective: 3, political: 3, social: 4 };
 
 console.log("\n=== Test 1: 已达目标，gap = 0 ===");
 {
@@ -62,7 +71,7 @@ console.log("\n=== Test 3: 中等 gap，DP 与贪心均可行 ===");
 
 console.log("\n=== Test 4: org 互斥约束 ===");
 {
-  const scores = makeScores(80, 10, 6, 0, 5); // 仅 org 子项可加
+  const scores = makeScores(80, 10, 6, 0, 5, CONDUCT_FULL); // 仅 org 子项可加
   const r = recommend(scores, 102); // gap = 1，目标 102
   assert(r.feasible, "feasible");
   const orgItems = r.selected.filter(s => s.module === "org");
@@ -71,8 +80,8 @@ console.log("\n=== Test 4: org 互斥约束 ===");
 
 console.log("\n=== Test 5: 模块封顶约束 ===");
 {
-  // 品行已满 80，再选 conduct 项无效
-  const scores = makeScores(80, 0, 0, 0, 0); // gap = 5, 但 conduct 满了
+  // 品行已满 80（三子项分别封顶），再选 conduct 项无效
+  const scores = makeScores(80, 0, 0, 0, 0, CONDUCT_FULL); // gap = 5, 但 conduct 满了
   const r = recommend(scores, 85);
   assert(r.feasible, "feasible");
   const conductItems = r.selected.filter(s => s.module === "conduct");
@@ -212,6 +221,86 @@ console.log('\n=== Test 16: 论文"国内一般"用户不推核心 / 国际 / �
   assert(rejectCore, "国内一般用户：核心期刊各档被拒");
   assert(rejectIntl, "国内一般用户：国际期刊各档被拒");
   assert(rejectBookPat, "国内一般用户：专著与发明专利被拒");
+}
+
+console.log("\n=== Test 17: 品行子项封顶——思政满则不推思政（修缺陷 2）===");
+{
+  // conduct.total=73（基准70+思政3），思政子项已满但品行整体仍有余量
+  const scores = makeScores(73, 0, 0, 0, 0, { collective: 0, political: 3, social: 0 });
+  const r = recommend(scores, 76); // gap=3
+  assert(r.feasible, "feasible");
+  const politicalPicked = r.selected.filter(c => c.id.startsWith("political_"));
+  assert(politicalPicked.length === 0, `思政已满不应推荐思政项（实际 ${politicalPicked.length} 项）`);
+  // 反证：思政未满时仍可推荐思政项
+  const scores2 = makeScores(70, 0, 0, 0, 0, { collective: 0, political: 0, social: 0 });
+  const r2 = recommend(scores2, 71); // gap=1，思政空 → 最便宜的 political_basic(8) 应入选
+  assert(r2.selected.some(c => c.id === "political_basic"), "思政未满时可推荐 political_basic");
+}
+
+console.log("\n=== Test 18: 已完成的一次性项被自动跳过（修缺陷 1）===");
+{
+  const state = {
+    politicalStudy: { basic: true, provincial: false, outstanding: false },
+    socialService: { volunteerHours: 40, socialPractice: true, internLevel: "city", advancedIndividual: false },
+    recordBreak: "school",
+  };
+  const ids = achievedCandidateIds(state);
+  assert(ids.has("political_basic"), "已勾选基础思政 → 跳过 political_basic");
+  assert(ids.has("volunteer_32") && ids.has("volunteer_64"), "志愿≥32h → 跳过 volunteer_32/64");
+  assert(ids.has("social_practice"), "已参加社会实践 → 跳过 social_practice");
+  assert(ids.has("intern_city"), "市级挂职 → 跳过 intern_city");
+  assert(!ids.has("intern_province"), "市级挂职不应跳过 intern_province");
+  assert(ids.has("sport_record_school"), "已破校纪录 → 跳过 sport_record_school");
+  assert(!ids.has("sport_record_provincial"), "破校纪录不应跳过 sport_record_provincial");
+
+  // 模拟 RecommenderTab 过滤后：已完成项不再出现在推荐里
+  const scores = makeScores(72, 0, 0, 0, 0, { collective: 0, political: 1, social: 2 });
+  const filtered = CANDIDATES.filter(c => !ids.has(c.id));
+  const r = recommend(scores, 75, filtered);
+  assert(r.selected.every(c => !ids.has(c.id)), "推荐结果不含任何已完成项");
+
+  // 空 state 不崩
+  assert(achievedCandidateIds(undefined).size === 0, "空 state → 空集合");
+}
+
+console.log("\n=== Test 19: 前置依赖守卫——无前置不推额外加分 ===");
+{
+  const noPrereq = {
+    politicalStudy: { basic: false, provincial: false },
+    socialService: { volunteerHours: 0, socialPractice: false, internLevel: "none" },
+  };
+  const outstanding = CANDIDATES.find(c => c.id === "political_outstanding");
+  const advanced = CANDIDATES.find(c => c.id === "advanced_individual");
+  assert(!isCandidateAvailable(outstanding, noPrereq), "无培训 → 不推思政优秀学员");
+  assert(!isCandidateAvailable(advanced, noPrereq), "无社会服务 → 不推先进个人");
+
+  const withPrereq = {
+    politicalStudy: { basic: true, provincial: false },
+    socialService: { volunteerHours: 10, socialPractice: false, internLevel: "none" },
+  };
+  assert(isCandidateAvailable(outstanding, withPrereq), "已做基础思政 → 可推优秀学员");
+  assert(isCandidateAvailable(advanced, withPrereq), "已有志愿时长 → 可推先进个人");
+  // 无关项不受影响
+  assert(isCandidateAvailable(CANDIDATES.find(c => c.id === "good_deeds_1"), noPrereq), "好人好事不受前置约束");
+}
+
+console.log("\n=== Test 20: org 替换模型（修缺陷 3，按净增计、不推已达职务）===");
+{
+  // 当前 org=2（三级优）；品行/学术/文体/奖励都已满，只剩 org 可加
+  const scores = makeScores(80, 10, 6, 2, 5, CONDUCT_FULL); // total=103
+  const r = recommend(scores, 104); // gap=1
+  assert(r.feasible, "feasible");
+  const orgItems = r.selected.filter(c => c.module === "org");
+  assert(orgItems.length === 1, `只选 1 个 org 项（实际 ${orgItems.length}）`);
+  // 净增 ≤ 当前 org 分(2) 的职务被丢弃，所选职务按"净增"计，受 org 余量(4-2=2)约束
+  assert(orgItems[0].value <= 2 + 1e-9, `org 项按净增计 ≤2（实际 ${orgItems[0].value}）`);
+  assert(r.achievable <= 2 + 1e-9, `实际增量受 org 余量约束 ≤2（实际 ${r.achievable}）`);
+
+  // org 已满(=4) 且仅 org 候选 → 不可达不崩
+  const full = makeScores(80, 10, 6, 4, 0, CONDUCT_FULL); // total=100
+  const orgOnly = CANDIDATES.filter(c => c.module === "org");
+  const r2 = recommend(full, 101, orgOnly); // 需 +1，但 org 已满
+  assert(!r2.feasible, "org 已满且仅 org 候选 → infeasible");
 }
 
 console.log(`\n=== 总计 ${passed + failed} 项断言：${passed} 通过，${failed} 失败 ===`);

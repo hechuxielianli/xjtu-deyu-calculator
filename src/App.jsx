@@ -136,7 +136,7 @@ export default function App() {
                   goodDeeds={goodDeeds} setGoodDeeds={setGoodDeeds} />
               )}
 
-              {tab === "recommender" && <RecommenderTab scores={scores} />}
+              {tab === "recommender" && <RecommenderTab scores={scores} state={stateObj} />}
 
               <ScoreSummary scores={scores} onExport={() => setShowExport(true)} variant="floating" className="lg:hidden" />
             </div>

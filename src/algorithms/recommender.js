@@ -5,16 +5,16 @@
 const SCALE = 10;
 
 export const CANDIDATES = [
-  { id: "collective_x10", label: "完成 10 次集体活动", module: "conduct", value: 3, cost: 20, difficulty: "normal" },
-  { id: "volunteer_32", label: "志愿服务 32 小时", module: "conduct", value: 1, cost: 32, difficulty: "normal" },
-  { id: "volunteer_64", label: "志愿服务 64 小时（已封顶）", module: "conduct", value: 1, cost: 64, difficulty: "normal" },
-  { id: "social_practice", label: "参加一次社会实践", module: "conduct", value: 1, cost: 24, difficulty: "normal" },
-  { id: "intern_city", label: "市级挂职锻炼", module: "conduct", value: 1, cost: 200, difficulty: "hard" },
-  { id: "intern_province", label: "省级挂职锻炼", module: "conduct", value: 2, cost: 400, difficulty: "very-hard" },
-  { id: "advanced_individual", label: "获评社会服务先进个人", module: "conduct", value: 1, cost: 50, difficulty: "hard" },
-  { id: "political_basic", label: "完成基础思政学习", module: "conduct", value: 1, cost: 8, difficulty: "normal" },
-  { id: "political_provincial", label: "参加省部级培训", module: "conduct", value: 2, cost: 40, difficulty: "hard" },
-  { id: "political_outstanding", label: "思政突出表现", module: "conduct", value: 1, cost: 30, difficulty: "normal" },
+  { id: "collective_x10", label: "完成 10 次集体活动", module: "conduct", sub: "collective", value: 3, cost: 20, difficulty: "normal" },
+  { id: "volunteer_32", label: "志愿服务 32 小时", module: "conduct", sub: "social", value: 1, cost: 32, difficulty: "normal" },
+  { id: "volunteer_64", label: "志愿服务 64 小时（已封顶）", module: "conduct", sub: "social", value: 1, cost: 64, difficulty: "normal" },
+  { id: "social_practice", label: "参加一次社会实践", module: "conduct", sub: "social", value: 1, cost: 24, difficulty: "normal" },
+  { id: "intern_city", label: "市级挂职锻炼", module: "conduct", sub: "social", value: 1, cost: 200, difficulty: "hard" },
+  { id: "intern_province", label: "省级挂职锻炼", module: "conduct", sub: "social", value: 2, cost: 400, difficulty: "very-hard" },
+  { id: "advanced_individual", label: "获评社会服务先进个人", module: "conduct", sub: "social", value: 1, cost: 50, difficulty: "hard" },
+  { id: "political_basic", label: "完成基础思政学习", module: "conduct", sub: "political", value: 1, cost: 8, difficulty: "normal" },
+  { id: "political_provincial", label: "参加省部级培训", module: "conduct", sub: "political", value: 2, cost: 40, difficulty: "hard" },
+  { id: "political_outstanding", label: "思政突出表现", module: "conduct", sub: "political", value: 1, cost: 30, difficulty: "normal" },
 
   { id: "comp_school_excellence", label: "校级竞赛优秀奖", module: "academic", value: 1, cost: 30, difficulty: "normal" },
   { id: "comp_school_3", label: "校级竞赛三等奖", module: "academic", value: 2, cost: 60, difficulty: "normal" },
@@ -86,16 +86,41 @@ export const CANDIDATES = [
   { id: "good_deeds_1", label: "完成 1 件好人好事", module: "reward", value: 1, cost: 10, difficulty: "normal" },
 ];
 
-const MODULES = ["conduct", "academic", "arts", "org", "reward"];
+// 封顶组：品行（conduct）内部拆成三个各自独立封顶的子项（集体3/思政3/社会4），
+// 与能力的 academic/arts/org 一样按子项分别背包，避免"子项满了仍推荐该子项"。
+const CAP_GROUPS = ["collective", "political", "social", "academic", "arts", "org", "reward"];
+
+// 候选项归属的封顶组：conduct 用其 sub 子项，其余用 module 本身。
+const capGroupOf = (c) => c.sub ?? c.module;
 
 function moduleCaps(scores) {
+  const conduct = scores.conduct || {};
   return {
-    conduct: Math.max(0, 80 - scores.conduct.total),
+    collective: Math.max(0, 3 - (conduct.collective ?? 0)),
+    political: Math.max(0, 3 - (conduct.political ?? 0)),
+    social: Math.max(0, 4 - (conduct.social ?? 0)),
     academic: Math.max(0, 10 - scores.ability.academic),
     arts: Math.max(0, 6 - scores.ability.artSport),
     org: Math.max(0, 4 - scores.ability.org),
     reward: Math.max(0, 5 - scores.reward.total),
   };
+}
+
+// org 替换模型：组织任职"取最高一职、不累加"，故候选项的实际价值应为
+// "相对当前 org 分的净增"。净增 ≤ 0（同级/更低职务）的候选直接丢弃。
+// 返回新数组，不可变异原 CANDIDATES。
+function prepareCandidates(candidates, scores) {
+  const orgNow = scores?.ability?.org ?? 0;
+  const out = [];
+  for (const c of candidates) {
+    if (c.module === "org") {
+      const gain = c.value - orgNow;
+      if (gain > 1e-9) out.push({ ...c, value: gain });
+    } else {
+      out.push(c);
+    }
+  }
+  return out;
 }
 
 // 模块内 0/1 背包：返回 cost[v] = 在该模块达到精确增量 v 的最小代价
@@ -176,11 +201,15 @@ export function recommend(scores, targetTotal, candidates = CANDIDATES) {
     return { selected: [], cost: 0, achievable: 0, gap, feasible: true, timeMs: 0 };
   }
 
+  const prepared = prepareCandidates(candidates, scores);
   const caps = moduleCaps(scores);
   const groups = {};
-  for (const c of candidates) (groups[c.module] = groups[c.module] || []).push(c);
+  for (const c of prepared) {
+    const g = capGroupOf(c);
+    (groups[g] = groups[g] || []).push(c);
+  }
 
-  const tables = MODULES.map(m =>
+  const tables = CAP_GROUPS.map(m =>
     moduleKnapsack(groups[m] || [], caps[m] || 0, m === "org")
   );
   let merged = tables[0];
@@ -218,10 +247,11 @@ export function recommendGreedy(scores, targetTotal, candidates = CANDIDATES) {
     return { selected: [], cost: 0, achievable: 0, gap, feasible: true, timeMs: 0 };
   }
 
+  const prepared = prepareCandidates(candidates, scores);
   const caps = moduleCaps(scores);
-  const sorted = [...candidates].sort((a, b) => b.value / b.cost - a.value / a.cost);
+  const sorted = [...prepared].sort((a, b) => b.value / b.cost - a.value / a.cost);
 
-  const used = { conduct: 0, academic: 0, arts: 0, org: 0, reward: 0 };
+  const used = { collective: 0, political: 0, social: 0, academic: 0, arts: 0, org: 0, reward: 0 };
   let orgPicked = false;
   const selected = [];
   let achieved = 0;
@@ -229,12 +259,13 @@ export function recommendGreedy(scores, targetTotal, candidates = CANDIDATES) {
 
   for (const c of sorted) {
     if (achieved >= gap) break;
-    if (c.module === "org" && orgPicked) continue;
-    const remain = caps[c.module] - used[c.module];
+    const g = capGroupOf(c);
+    if (g === "org" && orgPicked) continue;
+    const remain = caps[g] - used[g];
     if (c.value > remain + 1e-9) continue;
     selected.push(c);
-    used[c.module] += c.value;
-    if (c.module === "org") orgPicked = true;
+    used[g] += c.value;
+    if (g === "org") orgPicked = true;
     achieved += c.value;
     totalCost += c.cost;
   }
@@ -369,5 +400,48 @@ export function isCandidateReasonable(c, ctx = DEFAULT_USER_CONTEXT) {
   }
 
   // 其它（基础思政、志愿、集体活动、社会实践、挂职、好人好事等）不受现状约束
+  return true;
+}
+
+// 根据计算器里"已实际录入"的状态，得出已经完成、无需再推荐的"一次性 / 阈值型"候选 id。
+// 这些项再做一次也不会增分（布尔已勾选 / 阈值已达），推荐它们即缺陷 1。
+// 注意：竞赛、论文、荣誉、好人好事等"可累加"项不在此列——它们可继续叠加直到封顶。
+export function achievedCandidateIds(state) {
+  const done = new Set();
+  if (!state) return done;
+  const ps = state.politicalStudy || {};
+  const ss = state.socialService || {};
+
+  if (ps.basic) done.add("political_basic");
+  if (ps.provincial) done.add("political_provincial");
+  if (ps.outstanding) done.add("political_outstanding");
+
+  if ((ss.volunteerHours ?? 0) >= 32) { done.add("volunteer_32"); done.add("volunteer_64"); }
+  if (ss.socialPractice) done.add("social_practice");
+  if (ss.internLevel === "city" || ss.internLevel === "province") done.add("intern_city");
+  if (ss.internLevel === "province") done.add("intern_province");
+  if (ss.advancedIndividual) done.add("advanced_individual");
+
+  if (state.recordBreak === "school" || state.recordBreak === "provincial") done.add("sport_record_school");
+  if (state.recordBreak === "provincial") done.add("sport_record_provincial");
+
+  return done;
+}
+
+// 前置依赖守卫：某些"额外加分"按规则需先满足前置条件，否则实际算 0 分（见 useScoreCalculator）。
+// 在前置未满足时不推荐这些项，避免给出无效建议。返回 false 表示当前不可推荐。
+export function isCandidateAvailable(c, state) {
+  if (!state) return true;
+  const ps = state.politicalStudy || {};
+  const ss = state.socialService || {};
+
+  // "思政优秀学员"需先参加基础或省部级培训
+  if (c.id === "political_outstanding") return !!(ps.basic || ps.provincial);
+
+  // "社会服务先进个人"需先参加任一社会服务项目
+  if (c.id === "advanced_individual") {
+    return (ss.volunteerHours ?? 0) > 0 || !!ss.socialPractice || (ss.internLevel && ss.internLevel !== "none");
+  }
+
   return true;
 }
