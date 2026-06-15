@@ -247,13 +247,14 @@ export function RecommenderTab({ scores, state }) {
 
       {/* ── 推荐结果（放在配置之后、"我的现状"之前） ── */}
       {result && skippedCount > 0 && (
-        <p className="text-xs text-slate-500 dark:text-slate-400 px-1 -mb-1">
-          已根据你当前的填写，自动跳过 <span className="font-semibold text-slate-700 dark:text-slate-200">{skippedCount}</span> 个已完成 / 不再增分的项目。
-        </p>
+        <div className="flex items-start gap-2 rounded-xl px-3 py-2 text-xs border bg-brand-50/60 dark:bg-brand-900/20 border-brand-100/70 dark:border-brand-800/40 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
+          <span aria-hidden className="shrink-0 mt-px font-bold text-brand-500 dark:text-brand-300">ⓘ</span>
+          <span>已根据你当前的填写，自动跳过 <span className="font-semibold text-slate-800 dark:text-slate-100">{skippedCount}</span> 个已完成 / 不再增分的项目。</span>
+        </div>
       )}
 
       {result && !result.feasible && (
-        <Card className="border-danger-300/70 dark:border-danger-700/50">
+        <Card className="border-danger-300/70 dark:border-danger-700/50 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
           <h3 className="text-sm font-semibold text-danger-700 dark:text-danger-300 mb-2">无法达成目标</h3>
           <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
             当前候选项不足以达成目标。可以：① 取消已排除的项目；② 在「我的现状」中提高已声明的最高档位以扩大推荐范围；③ 或调低目标分。
@@ -268,14 +269,14 @@ export function RecommenderTab({ scores, state }) {
       )}
 
       {result && result.feasible && result.selected.length === 0 && (
-        <Card>
+        <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
           <Badge color="success">已达标</Badge>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">当前总分已≥目标分，无需任何加分项。</p>
         </Card>
       )}
 
       {result && result.feasible && result.selected.length > 0 && (
-        <Card>
+        <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
           <ResultBody result={result} onExclude={onExclude} fadingId={fadingId} />
         </Card>
@@ -288,7 +289,7 @@ export function RecommenderTab({ scores, state }) {
             <span className="text-xs text-slate-400 dark:text-slate-500">
               {contextFilledCount > 0 ? `已填 ${contextFilledCount}/6 项` : "可选 · 填写后推荐更贴合实际"}
             </span>
-            <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform">▾</span>
+            <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">▾</span>
           </summary>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-3">
             推荐器只会建议「不超过你已达档位」的项目。例如选择"任职=三级"，将不再推荐一/二级职务。
@@ -317,10 +318,10 @@ export function RecommenderTab({ scores, state }) {
       </Card>
 
       <details className="group">
-        <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 select-none py-1 inline-flex items-center gap-1">
+        <summary className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 select-none py-1 inline-flex items-center gap-1 transition-colors duration-200">
           ▸<span className="group-open:hidden">了解推荐原理</span><span className="hidden group-open:inline">推荐原理</span>
         </summary>
-        <div className="mt-3 px-1 space-y-3 text-xs text-slate-600 dark:text-slate-300">
+        <div className="mt-3 p-3 space-y-3 text-xs rounded-xl border bg-white/50 dark:bg-slate-900/40 backdrop-blur-sm border-white/50 dark:border-white/5 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.2s_ease-out]">
           <div>
             <p className="font-semibold mb-1 text-slate-700 dark:text-slate-200">① 优化目标</p>
             <p>
@@ -331,7 +332,7 @@ export function RecommenderTab({ scores, state }) {
 
           <div>
             <p className="font-semibold mb-1 text-slate-700 dark:text-slate-200">② 约束条件</p>
-            <ul className="space-y-0.5 list-disc list-inside pl-1 text-slate-500 dark:text-slate-400">
+            <ul className="space-y-0.5 list-disc list-inside pl-1 text-slate-500 dark:text-slate-300">
               <li>各模块独立封顶：品行 <span className="font-mono">80</span> / 学术 <span className="font-mono">10</span> / 文体 <span className="font-mono">6</span> / 任职 <span className="font-mono">4</span> / 奖励 <span className="font-mono">5</span></li>
               <li>组织任职<span className="font-semibold text-slate-700 dark:text-slate-200">互斥</span>：最多担任一项</li>
               <li>"我的现状"声明的档位会自动过滤掉超出范围的候选项（例如已任三级则不再推荐一/二级）</li>
@@ -343,9 +344,9 @@ export function RecommenderTab({ scores, state }) {
             <p className="mb-1.5">
               问题等价于 <span className="font-semibold">带模块上限的 0/1 背包变形</span>：
               <br />
-              <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">变量 x_i ∈ {`{0,1}`}，约束 Σ value_i·x_i ≥ 分差 且 各模块 Σ ≤ cap_m，目标 min Σ cost_i·x_i</span>
+              <span className="font-mono text-[11px] text-slate-500 dark:text-slate-300">变量 x_i ∈ {`{0,1}`}，约束 Σ value_i·x_i ≥ 分差 且 各模块 Σ ≤ cap_m，目标 min Σ cost_i·x_i</span>
             </p>
-            <ul className="space-y-1 list-disc list-inside pl-1 text-slate-500 dark:text-slate-400">
+            <ul className="space-y-1 list-disc list-inside pl-1 text-slate-500 dark:text-slate-300">
               <li>
                 <span className="font-medium text-slate-700 dark:text-slate-200">DP（动态规划，本工具采用）</span>：
                 按模块独立做 0/1 背包得到「精确增量 v → 最小代价」表 → 跨模块合并背包 → 在 v ≥ 分差区间取最小 cost 并回溯还原选项。复杂度 <span className="font-mono text-[11px]">{info.dp}</span>。
@@ -359,7 +360,7 @@ export function RecommenderTab({ scores, state }) {
 
           <div>
             <p className="font-semibold mb-1 text-slate-700 dark:text-slate-200">④ 数据规模 / 性能</p>
-            <p className="text-slate-500 dark:text-slate-400">
+            <p className="text-slate-500 dark:text-slate-300">
               候选项库共 <span className="font-mono text-slate-700 dark:text-slate-200">{info.N}</span> 项，
               总状态空间 W = <span className="font-mono text-slate-700 dark:text-slate-200">{info.W_total}</span>（0.1 分精度 × 105 满分）。
               典型场景下 DP 实测耗时 &lt; 1 ms，对用户交互无可感延迟。

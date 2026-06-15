@@ -59,7 +59,7 @@ export function SectionTitle({ icon, title, subtitle, score, maxScore, color }) 
       </div>
       {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-7">{subtitle}</p>}
       <div className="h-1.5 rounded-full bg-slate-200/70 dark:bg-slate-700/60 overflow-hidden">
-        <div className={cn("h-full rounded-full transition-all duration-500", BAR_COLORS[color] || BAR_COLORS.brand)} style={{ width: `${Math.min(100, (score / maxScore) * 100)}%` }} />
+        <div className={cn("h-full rounded-full transition-all duration-500 ease-out", BAR_COLORS[color] || BAR_COLORS.brand)} style={{ width: `${Math.min(100, (score / maxScore) * 100)}%` }} />
       </div>
     </div>
   );

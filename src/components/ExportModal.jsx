@@ -215,7 +215,7 @@ export function ExportModal({ scores, isDark, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
-      <div className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col"
+      <div className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col motion-safe:animate-[fadeInUp_0.24s_ease-out]"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/60 dark:border-white/10 shrink-0">
           <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">

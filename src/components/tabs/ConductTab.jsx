@@ -35,7 +35,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
             <div className="flex gap-1 rounded-lg p-0.5 mb-3 bg-slate-100 dark:bg-slate-700">
               {["count", "manual"].map(m => (
                 <button key={m} onClick={() => setCollectiveMode(m)}
-                  className={cn("flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all",
+                  className={cn("flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200",
                     collectiveMode === m ? "bg-white text-slate-800 shadow-sm dark:bg-slate-600 dark:text-slate-100" : "text-slate-500 dark:text-slate-400")}>
                   {m === "count" ? "按次数计算" : "手动填写"}
                 </button>

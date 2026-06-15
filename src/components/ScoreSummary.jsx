@@ -43,7 +43,7 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
 
       <button onClick={onExport}
         className={cn(
-          "flex items-center justify-center gap-2 py-2.5 px-6 rounded-xl text-sm font-medium transition-all",
+          "flex items-center justify-center gap-2 py-2.5 px-6 rounded-xl text-sm font-medium transition-all duration-200",
           "bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 text-white",
           "hover:from-brand-700 hover:via-brand-600 hover:to-accent-600",
           "shadow-lg shadow-brand-500/25 dark:shadow-brand-500/20",

@@ -82,9 +82,9 @@ export default function App() {
             {/* 小屏展示三色进度条 + 模块标签；大屏由右栏 ScoreSummary 承担 */}
             <div className="lg:hidden">
               <div className="flex gap-0.5 h-2 rounded-full overflow-hidden bg-slate-200/60 dark:bg-slate-700/60">
-                <div className="bg-gradient-to-r from-conduct-400 to-conduct-600 rounded-l-full transition-all duration-500" style={{ width: `${(scores.conduct.total / 105) * 100}%` }} />
-                <div className="bg-gradient-to-r from-ability-400 to-ability-600 transition-all duration-500" style={{ width: `${(scores.ability.total / 105) * 100}%` }} />
-                <div className="bg-gradient-to-r from-reward-300 to-reward-500 rounded-r-full transition-all duration-500" style={{ width: `${(scores.reward.total / 105) * 100}%` }} />
+                <div className="bg-gradient-to-r from-conduct-400 to-conduct-600 rounded-l-full transition-all duration-500 ease-out" style={{ width: `${(scores.conduct.total / 105) * 100}%` }} />
+                <div className="bg-gradient-to-r from-ability-400 to-ability-600 transition-all duration-500 ease-out" style={{ width: `${(scores.ability.total / 105) * 100}%` }} />
+                <div className="bg-gradient-to-r from-reward-300 to-reward-500 rounded-r-full transition-all duration-500 ease-out" style={{ width: `${(scores.reward.total / 105) * 100}%` }} />
               </div>
               <div className="flex justify-between mt-1 text-xs text-slate-500 dark:text-slate-400">
                 <span><span className="inline-block w-2 h-2 rounded-full bg-conduct-500 mr-1 align-middle" />品行 {scores.conduct.total.toFixed(1)}</span>
@@ -107,6 +107,8 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
             {/* ── 左栏：Tab 内容 + 小屏 ScoreSummary ── */}
             <div className="min-w-0">
+              {/* key={tab} 使每次切换重新挂载 → 入场动画重播；ScoreSummary 留在外层不重播 */}
+              <div key={tab} className="motion-safe:animate-[fadeInUp_0.28s_ease-out]">
               {tab === "conduct" && (
                 <ConductTab scores={scores}
                   basePass={basePass} setBasePass={setBasePass}
@@ -137,6 +139,7 @@ export default function App() {
               )}
 
               {tab === "recommender" && <RecommenderTab scores={scores} state={stateObj} />}
+              </div>
 
               <ScoreSummary scores={scores} onExport={() => setShowExport(true)} variant="floating" className="lg:hidden" />
             </div>
