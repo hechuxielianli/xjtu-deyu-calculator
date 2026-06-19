@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TabNav } from "./components/ui";
 import { IconSun, IconMoon, IconShare, IconShieldCheck, IconAward, IconStar, IconCalculator } from "./components/icons";
 import { ConductTab } from "./components/tabs/ConductTab";
@@ -13,10 +13,8 @@ import { loadState, usePersistState } from "./hooks/useLocalStorage";
 
 export default function App() {
   const [tab, setTab] = useState("conduct");
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
   const [showExport, setShowExport] = useState(false);
-
-  useEffect(() => { if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) setDark(true); }, []);
 
   // ── State (restored from localStorage) ──
   const [initialState] = useState(() => loadState());

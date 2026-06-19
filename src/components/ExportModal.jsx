@@ -182,7 +182,7 @@ export function ExportModal({ scores, isDark, onClose }) {
   useEffect(() => {
     const logoImg = new Image();
     logoImg.crossOrigin = "anonymous";
-    logoImg.src = "/hero.png";
+    logoImg.src = "/xjtublue.png";
 
     const render = (img) => {
       const c = drawExportImage(scores, isDark, img);

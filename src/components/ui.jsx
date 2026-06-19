@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { IconCheck, IconPlus, IconX, IconChevronUp, IconChevronDown } from "./icons";
-
-export const cn = (...a) => a.filter(Boolean).join(" ");
+import { cn } from "../utils/cn";
 
 export function Card({ children, className, hoverable = false, accent }) {
   const accentBorder = {

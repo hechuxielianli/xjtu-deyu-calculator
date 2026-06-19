@@ -1,4 +1,4 @@
-import { cn } from "./ui";
+import { cn } from "../utils/cn";
 
 export function ScoreChart({ scores }) {
   const modules = [

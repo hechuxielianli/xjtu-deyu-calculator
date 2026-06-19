@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Agent worktrees（agent 运行残留，未跟踪）
+.claude/worktrees/
+
 # Editor
 .vscode/
 *.swp

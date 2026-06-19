@@ -65,8 +65,8 @@ npm run dev
 # 构建生产版本
 npm run build
 
-# 运行单元测试（42 项断言覆盖推荐器算法与现状过滤）
-node src/algorithms/recommender.test.js
+# 运行单元测试（64 项断言覆盖推荐器算法与现状过滤）
+npm test   # 等价于 node src/algorithms/recommender.test.js
 ```
 
 ## 评分规则概览
@@ -127,22 +127,28 @@ node src/algorithms/recommender.test.js
 
 ```
 src/
-├── App.jsx                        # 主组件（状态管理 + 布局组合，~120 行）
+├── App.jsx                        # 主组件（状态管理 + 布局组合，~160 行）
 ├── index.css                      # Tailwind CSS 入口 + 自定义样式
 ├── main.jsx                       # React 应用入口
 ├── algorithms/                    # 算法层
 │   ├── recommender.js             # 目标分推荐器（背包 DP + 贪心 + 现状过滤）
-│   └── recommender.test.js        # 42 项断言的自动化单测
+│   └── recommender.test.js        # 64 项断言的自动化单测
 ├── data/
-│   └── constants.js               # 评分数据表 + localStorage 常量
+│   ├── constants.js               # 评分数据表 + localStorage 常量
+│   └── tooltips.jsx               # 评分规则提示文案（与组件解耦）
+├── utils/
+│   ├── cn.js                      # className 合并工具
+│   ├── listUtils.js               # 列表重排（moveUp / moveDown）
+│   └── uid.js                     # 列表项稳定 id 生成
 ├── components/
 │   ├── icons.jsx                  # SVG 图标组件
 │   ├── ui.jsx                     # 通用 UI 组件（Card, Badge, Select 等）
-│   ├── RuleTooltip.jsx            # 评分规则提示组件 + 内容
+│   ├── RuleTooltip.jsx            # 评分规则提示组件
 │   ├── ScoreChart.jsx             # 得分分布条形图
-│   ├── CollapsibleList.jsx        # 可折叠列表 + 排序工具
+│   ├── CollapsibleList.jsx        # 可折叠列表
 │   ├── ExportModal.jsx            # 导出弹窗 + Canvas 绘制
 │   ├── ScoreSummary.jsx           # 得分汇总卡片
+│   ├── BackgroundDecoration.jsx   # 背景装饰层
 │   └── tabs/
 │       ├── ConductTab.jsx         # 品行素质
 │       ├── AbilityTab.jsx         # 能力拓展

@@ -1,7 +1,10 @@
 import { Card, SectionTitle, Field, Select, NumberInput, AddButton, DynamicItem } from "../ui";
 import { IconStar } from "../icons";
-import { RuleTooltip, TOOLTIP_HONOR, TOOLTIP_DEEDS } from "../RuleTooltip";
-import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
+import { RuleTooltip } from "../RuleTooltip";
+import { TOOLTIP_HONOR, TOOLTIP_DEEDS } from "../../data/tooltips";
+import { CollapsibleList } from "../CollapsibleList";
+import { moveUp, moveDown } from "../../utils/listUtils";
+import { uid } from "../../utils/uid";
 import { HONOR_LEVELS } from "../../data/constants";
 
 export function RewardTab({ scores, honors, setHonors, goodDeeds, setGoodDeeds }) {
@@ -28,7 +31,7 @@ export function RewardTab({ scores, honors, setHonors, goodDeeds, setGoodDeeds }
               </div>
             </DynamicItem>
           )}
-          renderAdd={() => <AddButton onClick={() => setHonors(hs => [...hs, { level: 0 }])} label="添加荣誉表彰" />}
+          renderAdd={() => <AddButton onClick={() => setHonors(hs => [...hs, { id: uid(), level: 0 }])} label="添加荣誉表彰" />}
         />
       </Card>
       <Card>

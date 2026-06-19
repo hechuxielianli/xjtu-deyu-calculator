@@ -35,28 +35,13 @@ export function useScoreCalculator(state) {
     const penaltyTotal = penalties.reduce((s, p) => s + (PENALTY_TYPES[p.type]?.score || 0) * (p.count || 1), 0);
     const conductCapped = Math.min(80, Math.max(0, base + collective + political + social - penaltyTotal));
 
-    let academicCompTotal = 0;
-    academicComps.forEach(c => {
-      const t = ACADEMIC_COMP[c.level]; if (!t) return;
-      if (c.award === "special" || c.award === "first") academicCompTotal += t.first;
-      else if (c.award === "second") academicCompTotal += t.second;
-      else if (c.award === "third") academicCompTotal += t.third;
-      else if (c.award === "excellence") academicCompTotal += t.excellence || 0;
-    });
-    let paperTotal = 0;
-    papers.forEach(p => {
-      const t = PAPER_SCORES[p.type]; if (!t) return;
-      let s = t.scores[Math.min(p.authorRank - 1, 3)] || 0;
-      if (p.type === "book" && p.authorRank > 3) s = Math.max(1, 6 - (p.authorRank - 3));
-      if (p.outstandingPaper) s += 1;
-      paperTotal += s;
-    });
+    // 单项评分逻辑统一由下方导出的助手提供（AbilityTab 显示也用同一套），避免重复实现。
+    const academicCompTotal = academicComps.reduce((s, c) => s + getAcademicCompScore(c), 0);
+    const paperTotal = papers.reduce((s, p) => s + getPaperScore(p), 0);
     const academicTotal = Math.min(10, academicCompTotal + paperTotal);
 
-    let artTotal = 0;
-    artComps.forEach(c => { const t = ART_COMP[c.level]; if (t) artTotal += t[c.award] || 0; });
-    let sportTotal = 0;
-    sportComps.forEach(c => { const t = SPORT_COMP[c.level]; if (t) sportTotal += t[c.rank] || 0; });
+    const artTotal = artComps.reduce((s, c) => s + getArtScore(c), 0);
+    const sportTotal = sportComps.reduce((s, c) => s + getSportScore(c), 0);
     const recordBonus = recordBreak === "provincial" ? 5 : recordBreak === "school" ? 3 : 0;
     const artSportTotal = Math.min(6, artTotal + sportTotal + recordBonus);
 
@@ -72,7 +57,7 @@ export function useScoreCalculator(state) {
     return {
       conduct: { base, collective, political, social, penalty: penaltyTotal, total: conductCapped },
       ability: { academic: academicTotal, artSport: artSportTotal, org: orgCapped, total: abilityTotal },
-      reward: { honor: Math.min(5, honorTotal), deeds: goodDeeds, total: rewardCapped },
+      reward: { honor: honorTotal, deeds: goodDeeds, total: rewardCapped },
       total: conductCapped + abilityTotal + rewardCapped,
     };
   }, [basePass, collectiveMode, collectiveCount, collectivePerActivity, collectiveManual, collectiveOutstanding,

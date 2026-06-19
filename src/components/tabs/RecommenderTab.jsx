@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, Badge, SectionTitle, Select, Checkbox, cn } from "../ui";
+import { Card, Badge, SectionTitle, Select, Checkbox } from "../ui";
+import { cn } from "../../utils/cn";
 import { IconX, IconCalculator } from "../icons";
 import {
   recommend, CANDIDATES, isCandidateReasonable,
@@ -149,9 +150,10 @@ export function RecommenderTab({ scores, state }) {
     setResult(r);
     setRelaxed(rx);
     setSkippedCount(sc);
-    // target 故意不在依赖里：滑块拖动不应触发自动重算
+    // scores 入依赖：在其它 Tab 改了得分后切回时结果随之刷新（scores 由 useMemo 稳定，仅真实变化时变更引用）。
+    // target 故意不在依赖里：滑块拖动不应触发自动重算。
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [excludedIds, includeHard, userContext]);
+  }, [scores, excludedIds, includeHard, userContext]);
 
   const onExclude = (id) => {
     setFadingId(id);

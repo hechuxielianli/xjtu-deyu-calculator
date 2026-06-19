@@ -1,4 +1,5 @@
-import { Card, cn } from "./ui";
+import { Card } from "./ui";
+import { cn } from "../utils/cn";
 import { ScoreChart } from "./ScoreChart";
 import { IconShare, IconSigma } from "./icons";
 

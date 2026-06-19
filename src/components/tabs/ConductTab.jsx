@@ -1,7 +1,11 @@
-import { Card, Badge, SectionTitle, Field, Select, NumberInput, Checkbox, AddButton, DynamicItem, cn } from "../ui";
+import { Card, Badge, SectionTitle, Field, Select, NumberInput, Checkbox, AddButton, DynamicItem } from "../ui";
 import { IconShieldCheck } from "../icons";
-import { RuleTooltip, TOOLTIP_BASE, TOOLTIP_COLLECTIVE, TOOLTIP_POLITICAL, TOOLTIP_SOCIAL, TOOLTIP_PENALTY } from "../RuleTooltip";
-import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
+import { cn } from "../../utils/cn";
+import { RuleTooltip } from "../RuleTooltip";
+import { TOOLTIP_BASE, TOOLTIP_COLLECTIVE, TOOLTIP_POLITICAL, TOOLTIP_SOCIAL, TOOLTIP_PENALTY } from "../../data/tooltips";
+import { CollapsibleList } from "../CollapsibleList";
+import { moveUp, moveDown } from "../../utils/listUtils";
+import { uid } from "../../utils/uid";
 import { PENALTY_TYPES } from "../../data/constants";
 
 export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setCollectiveMode, collectiveCount, setCollectiveCount,
@@ -139,7 +143,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
               <div className="w-20"><NumberInput value={p.count} onChange={v => setPenalties(ps => ps.map((pp, j) => j === i ? { ...pp, count: v } : pp))} min={1} max={20} /></div>
             </DynamicItem>
           )}
-          renderAdd={() => <AddButton onClick={() => setPenalties(ps => [...ps, { type: 0, count: 1 }])} label="添加扣分项" />}
+          renderAdd={() => <AddButton onClick={() => setPenalties(ps => [...ps, { id: uid(), type: 0, count: 1 }])} label="添加扣分项" />}
         />
         {scores.conduct.penalty > 0 && <div className="mt-2 text-right"><Badge color="danger">−{scores.conduct.penalty.toFixed(1)}</Badge></div>}
       </Card>

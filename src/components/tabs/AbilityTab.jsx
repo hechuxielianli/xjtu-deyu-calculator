@@ -1,9 +1,16 @@
 import { Card, Badge, SectionTitle, Field, Select, Checkbox, AddButton, DynamicItem } from "../ui";
 import { IconAward } from "../icons";
-import { RuleTooltip, TOOLTIP_ACADEMIC, TOOLTIP_PAPER, TOOLTIP_ART, TOOLTIP_SPORT, TOOLTIP_ORG } from "../RuleTooltip";
-import { CollapsibleList, moveUp, moveDown } from "../CollapsibleList";
+import { RuleTooltip } from "../RuleTooltip";
+import { TOOLTIP_ACADEMIC, TOOLTIP_PAPER, TOOLTIP_ART, TOOLTIP_SPORT, TOOLTIP_ORG } from "../../data/tooltips";
+import { CollapsibleList } from "../CollapsibleList";
+import { moveUp, moveDown } from "../../utils/listUtils";
+import { uid } from "../../utils/uid";
 import { ACADEMIC_COMP, PAPER_SCORES, ART_COMP, SPORT_COMP, ORG_LEVELS } from "../../data/constants";
 import { getAcademicCompScore, getPaperScore, getArtScore, getSportScore } from "../../hooks/useScoreCalculator";
+
+// 切换竞赛级别时校正失效的奖项档位：学科竞赛"优秀奖"仅校级有；文艺"优秀奖"仅非校级有。
+const fixAcademicAward = (c) => (c.level !== "school" && c.award === "excellence") ? { ...c, award: "first" } : c;
+const fixArtAward = (c) => (c.level === "school" && c.award === "excellence") ? { ...c, award: "first" } : c;
 
 export function AbilityTab({ scores, academicComps, setAcademicComps, papers, setPapers, artComps, setArtComps,
   sportComps, setSportComps, recordBreak, setRecordBreak, orgPosition, setOrgPosition }) {
@@ -28,7 +35,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
                 showReorder={academicComps.length > 1}
                 score={getAcademicCompScore(c)} scoreColor="ability">
                 <div className="min-w-[120px] flex-1 sm:flex-none sm:w-36">
-                  <Select value={c.level} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
+                  <Select value={c.level} onChange={v => setAcademicComps(cs => cs.map((cc, j) => j === i ? fixAcademicAward({ ...cc, level: v }) : cc))}
                     options={Object.entries(ACADEMIC_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
                 </div>
                 <div className="w-24 sm:w-28">
@@ -38,7 +45,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
                 </div>
               </DynamicItem>
             )}
-            renderAdd={() => <AddButton onClick={() => setAcademicComps(cs => [...cs, { level: "national", award: "first" }])} label="添加竞赛获奖" />}
+            renderAdd={() => <AddButton onClick={() => setAcademicComps(cs => [...cs, { id: uid(), level: "national", award: "first" }])} label="添加竞赛获奖" />}
           />
 
         <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
@@ -65,7 +72,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
                 <Checkbox checked={p.outstandingPaper || false} onChange={v => setPapers(ps => ps.map((pp, j) => j === i ? { ...pp, outstandingPaper: v } : pp))} label="优秀论文" />
               </DynamicItem>
             )}
-            renderAdd={() => <AddButton onClick={() => setPapers(ps => [...ps, { type: "intl_journal", authorRank: 1, outstandingPaper: false }])} label="添加论文/专利" />}
+            renderAdd={() => <AddButton onClick={() => setPapers(ps => [...ps, { id: uid(), type: "intl_journal", authorRank: 1, outstandingPaper: false }])} label="添加论文/专利" />}
           />
       </Card>
 
@@ -82,7 +89,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               showReorder={artComps.length > 1}
               score={getArtScore(c)} scoreColor="ability">
               <div className="min-w-[100px] flex-1 sm:flex-none sm:w-32">
-                <Select value={c.level} onChange={v => setArtComps(cs => cs.map((cc, j) => j === i ? { ...cc, level: v } : cc))}
+                <Select value={c.level} onChange={v => setArtComps(cs => cs.map((cc, j) => j === i ? fixArtAward({ ...cc, level: v }) : cc))}
                   options={Object.entries(ART_COMP).map(([k, v]) => ({ value: k, label: v.label }))} />
               </div>
               <div className="w-24 sm:w-28">
@@ -92,7 +99,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               </div>
             </DynamicItem>
           )}
-          renderAdd={() => <AddButton onClick={() => setArtComps(cs => [...cs, { level: "national", award: "first" }])} label="添加文艺获奖" />}
+          renderAdd={() => <AddButton onClick={() => setArtComps(cs => [...cs, { id: uid(), level: "national", award: "first" }])} label="添加文艺获奖" />}
         />
 
         <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
@@ -117,7 +124,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
               </div>
             </DynamicItem>
           )}
-          renderAdd={() => <AddButton onClick={() => setSportComps(cs => [...cs, { level: "national", rank: "r1" }])} label="添加体育获奖" />}
+          renderAdd={() => <AddButton onClick={() => setSportComps(cs => [...cs, { id: uid(), level: "national", rank: "r1" }])} label="添加体育获奖" />}
         />
         <Field label="破纪录">
           <Select value={recordBreak} onChange={setRecordBreak}
