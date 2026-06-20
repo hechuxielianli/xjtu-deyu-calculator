@@ -94,18 +94,9 @@
   --color-success-900: #1b3727;
   --color-success-950: #0f2016;
 
-  /* ── 玻璃 / 阴影 / 圆角 ── */
-  --shadow-glass-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -6px rgba(15, 23, 42, 0.06);
+  /* ── 玻璃阴影令牌（被 Card 引用：shadow-glass-md / hover:shadow-glass-lg）── */
   --shadow-glass-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.10);
   --shadow-glass-lg: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 40px -16px rgba(31, 78, 121, 0.20);
-
-  --radius-card:     1rem;
-  --radius-card-lg:  1.25rem;
-
-  /* ── 微动效 ── */
-  --animate-aurora-drift: auroraDrift 18s ease-in-out infinite;
-  --animate-aurora-drift-slow: auroraDrift 26s ease-in-out infinite;
-  --animate-card-shine: cardShine 1.2s ease-out;
 }
 
 @keyframes auroraDrift {
@@ -139,6 +130,10 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  background-color: #f8fafc; /* slate-50：首屏（React 挂载前）兜底底色 */
+}
+html.dark {
+  background-color: #020617; /* slate-950：暗色首屏兜底，避免白闪 */
 }
 
 ::selection {

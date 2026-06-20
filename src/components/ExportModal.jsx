@@ -65,13 +65,13 @@ function drawExportImage(scores, isDark, logoImg) {
   // 渐变背景
   const bgGrad = ctx.createLinearGradient(0, 0, W, H);
   if (isDark) {
-    bgGrad.addColorStop(0, "#020617");
-    bgGrad.addColorStop(0.5, "#1e1b4b");
+    bgGrad.addColorStop(0, "#020617");   // slate-950
+    bgGrad.addColorStop(0.5, "#122f49"); // 交大蓝 brand-800
     bgGrad.addColorStop(1, "#020617");
   } else {
-    bgGrad.addColorStop(0, "#f8fafc");
-    bgGrad.addColorStop(0.5, "#eef2ff");
-    bgGrad.addColorStop(1, "#f5f3ff");
+    bgGrad.addColorStop(0, "#f8fafc");   // slate-50
+    bgGrad.addColorStop(0.5, "#eff4f9"); // 交大蓝 brand-50
+    bgGrad.addColorStop(1, "#fbf5e8");   // 暖金 accent-50（蓝→金呼应）
   }
   ctx.fillStyle = bgGrad; roundRect(ctx, 0, 0, W, H, 16, true);
 
@@ -178,6 +178,36 @@ function drawExportImage(scores, isDark, logoImg) {
 export function ExportModal({ scores, isDark, onClose }) {
   const canvasRef = useRef(null);
   const previewRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  // ── 模态可访问性：Esc 关闭、焦点移入/归还、Tab 焦点陷阱、锁定背景滚动 ──
+  useEffect(() => {
+    const prevActive = document.activeElement;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.focus();
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const list = Array.from(
+        dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter(el => !el.disabled && el.offsetParent !== null);
+      if (list.length === 0) return;
+      const first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+      if (prevActive instanceof HTMLElement) prevActive.focus();
+    };
+  }, [onClose]);
 
   useEffect(() => {
     const logoImg = new Image();
@@ -215,14 +245,15 @@ export function ExportModal({ scores, isDark, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
-      <div className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col motion-safe:animate-[fadeInUp_0.24s_ease-out]"
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="export-modal-title"
+        className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col outline-none motion-safe:animate-[fadeInUp_0.24s_ease-out]"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/60 dark:border-white/10 shrink-0">
-          <h3 className="text-[15px] font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <h3 id="export-modal-title" className="text-[15px] font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center"><IconArrowUpRight className="w-3.5 h-3.5" /></span>
             导出得分
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition"><IconX /></button>
+          <button type="button" onClick={onClose} aria-label="关闭" className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition"><IconX /></button>
         </div>
         <div className="p-4 overflow-auto">
           <div ref={previewRef} className="mb-4 rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/10 shadow-sm" />

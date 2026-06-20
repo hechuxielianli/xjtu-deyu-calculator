@@ -72,7 +72,7 @@ function ResultBody({ result, onExclude, fadingId }) {
           <div key={m}>
             <div className="flex items-center gap-2 mb-1">
               <Badge color={MODULE_META[m]?.color || "neutral"}>{MODULE_META[m]?.label || m}</Badge>
-              <span className="text-xs text-slate-400 dark:text-slate-500">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 +{items.reduce((s, c) => s + c.value, 0).toFixed(1)} 分 / {items.reduce((s, c) => s + c.cost, 0)} 小时
               </span>
             </div>
@@ -91,7 +91,7 @@ function ResultBody({ result, onExclude, fadingId }) {
                     <span className="text-slate-700 dark:text-slate-200 flex-1 truncate">{c.label}</span>
                     <span className="shrink-0 font-mono text-xs">
                       <span className="text-success-600 dark:text-success-400">+{c.value}</span>
-                      <span className="text-slate-400 dark:text-slate-500 mx-1">/</span>
+                      <span className="text-slate-500 dark:text-slate-400 mx-1">/</span>
                       <span className="text-ability-600 dark:text-ability-300">{formatCost(c.cost)}</span>
                     </span>
                     <button
@@ -99,7 +99,7 @@ function ResultBody({ result, onExclude, fadingId }) {
                       disabled={fading}
                       aria-label={`排除${c.label}`}
                       title="排除此项"
-                      className="shrink-0 text-slate-400 hover:text-danger-500 dark:text-slate-500 dark:hover:text-danger-400 p-1 rounded transition disabled:opacity-50"
+                      className="shrink-0 text-slate-500 hover:text-danger-500 dark:text-slate-400 dark:hover:text-danger-400 p-1 rounded transition disabled:opacity-50"
                     >
                       <IconX />
                     </button>
@@ -200,7 +200,7 @@ export function RecommenderTab({ scores, state }) {
           <input type="range" min={Math.ceil(scores.total)} max={105} step={0.5} value={target}
             onChange={e => setTarget(Number(e.target.value))}
             className="w-full" />
-          <div className="flex justify-between text-xs text-slate-400 dark:text-slate-500 mt-1">
+          <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
             <span>{Math.ceil(scores.total)}</span>
             <span>需要 +{Math.max(0, gap).toFixed(1)} 分</span>
             <span>105</span>
@@ -221,8 +221,8 @@ export function RecommenderTab({ scores, state }) {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {excludedArray.map(id => (
-                <button key={id} onClick={() => onRestore(id)}
-                  title="点击恢复"
+                <button key={id} type="button" onClick={() => onRestore(id)}
+                  title="点击恢复" aria-label={`恢复 ${labelById[id] || id}`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-slate-100/80 dark:bg-slate-700/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 hover:bg-danger-50 hover:text-danger-600 dark:hover:bg-danger-900/30 dark:hover:text-danger-300 transition">
                   <span className="truncate max-w-[10rem]">{labelById[id] || id}</span>
                   <span aria-hidden>×</span>
@@ -234,17 +234,18 @@ export function RecommenderTab({ scores, state }) {
       </Card>
 
       <Card>
-        <label className="flex items-start gap-3 cursor-pointer">
-          <div className="pt-0.5">
-            <Checkbox checked={includeHard} onChange={setIncludeHard} label="" />
-          </div>
-          <div className="flex-1 -ml-1">
-            <div className="text-sm font-medium text-slate-700 dark:text-slate-200">包含高难度项目</div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              如破校纪录、国家级竞赛奖项、省级以上荣誉、出版专著、发明专利等。取消勾选可仅看容易达成的项目。
-            </p>
-          </div>
-        </label>
+        <Checkbox
+          checked={includeHard}
+          onChange={setIncludeHard}
+          label={
+            <span className="block">
+              <span className="block text-sm font-medium text-slate-700 dark:text-slate-200">包含高难度项目</span>
+              <span className="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
+                如破校纪录、国家级竞赛奖项、省级以上荣誉、出版专著、发明专利等。取消勾选可仅看容易达成的项目。
+              </span>
+            </span>
+          }
+        />
       </Card>
 
       {/* ── 推荐结果（放在配置之后、"我的现状"之前） ── */}
@@ -288,10 +289,10 @@ export function RecommenderTab({ scores, state }) {
         <details open className="group">
           <summary className="cursor-pointer flex items-center gap-2 select-none list-none">
             <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">我的现状</h3>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {contextFilledCount > 0 ? `已填 ${contextFilledCount}/6 项` : "可选 · 填写后推荐更贴合实际"}
             </span>
-            <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">▾</span>
+            <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 group-open:rotate-180 transition-transform duration-200">▾</span>
           </summary>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-3">
             推荐器只会建议「不超过你已达档位」的项目。例如选择"任职=三级"，将不再推荐一/二级职务。

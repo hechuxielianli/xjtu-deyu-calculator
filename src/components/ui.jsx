@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { IconCheck, IconPlus, IconX, IconChevronUp, IconChevronDown } from "./icons";
 import { cn } from "../utils/cn";
 
@@ -16,9 +16,9 @@ export function Card({ children, className, hoverable = false, accent }) {
       "border-white/70 dark:border-white/10",
       "bg-white/85 dark:bg-slate-900/60",
       "backdrop-blur-xl dark:backdrop-blur-2xl",
-      "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.10)]",
+      "shadow-glass-md",
       "dark:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_8px_32px_-12px_rgba(0,0,0,0.6)]",
-      hoverable && "card-shine-on-hover hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_16px_40px_-16px_rgba(79,70,229,0.20)]",
+      hoverable && "card-shine-on-hover hover:-translate-y-0.5 hover:shadow-glass-lg",
       hoverable && accentBorder,
       className,
     )}>
@@ -62,7 +62,7 @@ export function SectionTitle({ icon, title, subtitle, score, maxScore, color }) 
       <div className="flex items-center gap-2.5 mb-1.5">
         <span className={cn("inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0", chip)}>{icon}</span>
         <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">{title}</h2>
-        <span className="ml-auto font-mono text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{maxScore}</span></span>
+        <span className="ml-auto font-mono text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-500 dark:text-slate-400">/{maxScore}</span></span>
       </div>
       {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-[2.625rem]">{subtitle}</p>}
       <div className="h-1.5 rounded-full bg-slate-200/70 dark:bg-slate-700/60 overflow-hidden">
@@ -77,7 +77,7 @@ export function Field({ label, children, hint }) {
     <div className="mb-3">
       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
       {children}
-      {hint && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -144,23 +144,24 @@ export function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
   );
 }
 
-export function Checkbox({ checked, onChange, label, disabled = false }) {
+export function Checkbox({ checked, onChange, label, disabled = false, ariaLabel }) {
   return (
     <label className={cn(
       "flex items-start gap-2 group",
       disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
     )}>
-      <div className={cn(
+      <div aria-hidden="true" className={cn(
         "w-4 h-4 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all",
-        checked && !disabled && "bg-brand-500 border-brand-500 shadow-[0_0_0_3px_rgba(99,102,241,0.15)]",
+        checked && !disabled && "bg-brand-500 border-brand-500 shadow-[0_0_0_3px_rgba(31,78,121,0.18)]",
         checked && disabled && "bg-slate-400 border-slate-400 dark:bg-slate-500 dark:border-slate-500",
         !checked && "border-slate-300 bg-white/60 group-hover:border-brand-400 dark:border-slate-500 dark:bg-slate-700/40 dark:group-hover:border-brand-400",
       )}>
         {checked && <IconCheck />}
       </div>
       <input type="checkbox" checked={checked} disabled={disabled}
+        aria-label={ariaLabel || (typeof label === "string" && label) || undefined}
         onChange={e => !disabled && onChange(e.target.checked)} className="sr-only" />
-      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
+      {label && <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>}
     </label>
   );
 }
@@ -191,11 +192,11 @@ export function DynamicItem({ children, onRemove, onMoveUp, onMoveDown, score, s
         {score !== undefined && <span className={cn("font-mono text-xs font-semibold px-1.5 py-0.5 rounded", badgeColor)}>{score >= 0 ? "+" : ""}{score}</span>}
         {showReorder && (
           <>
-            <button onClick={onMoveUp} disabled={!onMoveUp} className="text-slate-300 hover:text-brand-500 dark:text-slate-600 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronUp /></button>
-            <button onClick={onMoveDown} disabled={!onMoveDown} className="text-slate-300 hover:text-brand-500 dark:text-slate-600 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronDown /></button>
+            <button type="button" onClick={onMoveUp} disabled={!onMoveUp} aria-label="上移" className="text-slate-500 hover:text-brand-500 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronUp /></button>
+            <button type="button" onClick={onMoveDown} disabled={!onMoveDown} aria-label="下移" className="text-slate-500 hover:text-brand-500 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronDown /></button>
           </>
         )}
-        <button onClick={onRemove} className="text-slate-400 hover:text-danger-500 dark:text-slate-500 dark:hover:text-danger-400 p-1 rounded transition"><IconX /></button>
+        <button type="button" onClick={onRemove} aria-label="删除" className="text-slate-500 hover:text-danger-500 dark:text-slate-400 dark:hover:text-danger-400 p-1 rounded transition"><IconX /></button>
       </div>
     </div>
   );
@@ -204,8 +205,27 @@ export function DynamicItem({ children, onRemove, onMoveUp, onMoveDown, score, s
 export function TabNav({ active, onChange, tabs, className }) {
   const activeIdx = Math.max(0, tabs.findIndex(t => t.key === active));
   const widthPct = 100 / tabs.length;
+  const btnRefs = useRef([]);
+
+  // 键盘：←/→（及 ↑/↓）循环切换，Home/End 跳首尾，并把焦点跟到目标 tab（WAI-ARIA Tabs 模式）。
+  const moveTo = (idx) => {
+    const t = tabs[idx];
+    if (!t) return;
+    onChange(t.key);
+    btnRefs.current[idx]?.focus();
+  };
+  const onKeyDown = (e) => {
+    let next = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (activeIdx + 1) % tabs.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (activeIdx - 1 + tabs.length) % tabs.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = tabs.length - 1;
+    if (next !== null) { e.preventDefault(); moveTo(next); }
+  };
+
   return (
-    <div className={cn(
+    <div role="tablist" aria-label="评分模块" aria-orientation="horizontal" onKeyDown={onKeyDown}
+      className={cn(
       "relative flex gap-1 rounded-2xl p-1 mb-5",
       "bg-white/60 dark:bg-slate-800/50",
       "backdrop-blur-xl",
@@ -214,23 +234,31 @@ export function TabNav({ active, onChange, tabs, className }) {
       "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
       className,
     )}>
-      {/* 滑动 indicator */}
+      {/* 滑动 indicator（纯装饰） */}
       <div
+        aria-hidden="true"
         className="absolute top-1 bottom-1 rounded-xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-700 dark:to-slate-700/80 shadow-md shadow-brand-500/10 dark:shadow-brand-500/20 transition-all duration-300 ease-out pointer-events-none"
         style={{
           width: `calc(${widthPct}% - 0.5rem)`,
           left: `calc(${activeIdx * widthPct}% + 0.25rem)`,
         }}
       />
-      {tabs.map(t => (
-        <button key={t.key} onClick={() => onChange(t.key)}
+      {tabs.map((t, i) => (
+        <button key={t.key} type="button"
+          ref={el => (btnRefs.current[i] = el)}
+          role="tab"
+          id={`tab-${t.key}`}
+          aria-selected={active === t.key}
+          aria-controls={`panel-${t.key}`}
+          tabIndex={active === t.key ? 0 : -1}
+          onClick={() => onChange(t.key)}
           className={cn(
             "relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-colors duration-200",
             active === t.key
               ? "text-brand-700 dark:text-brand-200"
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
           )}>
-          <span className="shrink-0">{t.icon}</span><span>{t.label}</span>
+          <span className="shrink-0" aria-hidden="true">{t.icon}</span><span>{t.label}</span>
         </button>
       ))}
     </div>

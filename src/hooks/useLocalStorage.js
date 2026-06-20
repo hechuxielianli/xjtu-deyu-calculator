@@ -69,3 +69,21 @@ export function loadUserContext() {
 export function saveUserContext(ctx) {
   try { localStorage.setItem(USER_CONTEXT_KEY, JSON.stringify(ctx)); } catch { /* ignore */ }
 }
+
+// ── 主题（深/浅色）──
+// 与 index.html 首屏内联脚本共用同一 key，保证刷新前后一致、且无白屏闪烁。
+const THEME_KEY = "deyu_theme";
+
+export function loadTheme() {
+  try {
+    const t = localStorage.getItem(THEME_KEY);
+    if (t === "dark") return true;
+    if (t === "light") return false;
+  } catch { /* ignore */ }
+  // 未显式选择过 → 跟随系统偏好
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
+export function saveTheme(dark) {
+  try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch { /* ignore */ }
+}

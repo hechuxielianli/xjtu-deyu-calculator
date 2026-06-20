@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TabNav } from "./components/ui";
 import { IconSun, IconMoon, IconShare, IconShieldCheck, IconAward, IconStar, IconCalculator } from "./components/icons";
 import { ConductTab } from "./components/tabs/ConductTab";
@@ -9,12 +9,20 @@ import { ScoreSummary } from "./components/ScoreSummary";
 import { ExportModal } from "./components/ExportModal";
 import { BackgroundDecoration } from "./components/BackgroundDecoration";
 import { useScoreCalculator } from "./hooks/useScoreCalculator";
-import { loadState, usePersistState } from "./hooks/useLocalStorage";
+import { loadState, usePersistState, loadTheme, saveTheme } from "./hooks/useLocalStorage";
 
 export default function App() {
   const [tab, setTab] = useState("conduct");
-  const [dark, setDark] = useState(() => window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
+  const [dark, setDark] = useState(loadTheme);
   const [showExport, setShowExport] = useState(false);
+
+  // 主题持久化 + 单一真源：把 .dark 与 color-scheme 同步到 <html>（与 index.html 首屏内联脚本一致，消除闪烁）。
+  useEffect(() => {
+    const el = document.documentElement;
+    el.classList.toggle("dark", dark);
+    el.style.colorScheme = dark ? "dark" : "light";
+    saveTheme(dark);
+  }, [dark]);
 
   // ── State (restored from localStorage) ──
   const [initialState] = useState(() => loadState());
@@ -47,14 +55,13 @@ export default function App() {
   usePersistState(stateObj);
 
   return (
-    <div className={dark ? "dark" : ""}>
-      <div style={{ fontFamily: "'Noto Sans SC','PingFang SC',-apple-system,sans-serif" }}
-        className="min-h-screen relative transition-colors bg-gradient-to-br from-slate-50 via-brand-50/40 to-slate-100 dark:from-slate-950 dark:via-brand-950/30 dark:to-slate-900">
+    <div style={{ fontFamily: "'Noto Sans SC','PingFang SC',-apple-system,sans-serif" }}
+      className="min-h-screen relative transition-colors bg-gradient-to-br from-slate-50 via-brand-50/40 to-slate-100 dark:from-slate-950 dark:via-brand-950/30 dark:to-slate-900">
 
         <BackgroundDecoration dark={dark} />
 
         {/* ── HEADER ── */}
-        <div className="sticky top-0 z-50 border-b backdrop-blur-xl transition-colors bg-white/70 border-white/60 dark:bg-slate-950/60 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)]">
+        <header className="sticky top-0 z-50 border-b backdrop-blur-xl transition-colors bg-white/70 border-white/60 dark:bg-slate-950/60 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)]">
           <div className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3">
             <div className="flex items-center justify-between gap-2 mb-2 lg:mb-0">
               <div className="min-w-0 flex items-center gap-3">
@@ -69,11 +76,11 @@ export default function App() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => setShowExport(true)} title="导出" className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400"><IconShare /></button>
-                <button onClick={() => setDark(!dark)} title={dark ? "浅色" : "深色"} className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400">{dark ? <IconSun /> : <IconMoon />}</button>
-                <div className="text-right ml-2">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-300 dark:to-accent-300 bg-clip-text text-transparent">{scores.total.toFixed(1)}</div>
-                  <div className="text-xs text-slate-400 dark:text-slate-500 -mt-0.5">/ 105</div>
+                <button type="button" onClick={() => setShowExport(true)} title="导出" aria-label="导出得分报告" className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400"><IconShare /></button>
+                <button type="button" onClick={() => setDark(!dark)} title={dark ? "浅色模式" : "深色模式"} aria-label={dark ? "切换到浅色模式" : "切换到深色模式"} className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400">{dark ? <IconSun /> : <IconMoon />}</button>
+                <div className="text-right ml-2" aria-live="polite">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-300 dark:to-accent-300 bg-clip-text text-transparent"><span className="sr-only">当前总分 </span>{scores.total.toFixed(1)}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">/ 105</div>
                 </div>
               </div>
             </div>
@@ -91,10 +98,10 @@ export default function App() {
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* ── MAIN ── */}
-        <div className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 lg:py-7 pb-20">
+        <main id="main" className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-5 lg:py-7 pb-20">
           <TabNav className="lg:max-w-2xl" active={tab} onChange={setTab} tabs={[
             { key: "conduct", icon: <IconShieldCheck className="w-3.5 h-3.5" />, label: "品行素质" },
             { key: "ability", icon: <IconAward className="w-3.5 h-3.5" />, label: "能力拓展" },
@@ -106,7 +113,7 @@ export default function App() {
             {/* ── 左栏：Tab 内容 + 小屏 ScoreSummary ── */}
             <div className="min-w-0">
               {/* key={tab} 使每次切换重新挂载 → 入场动画重播；ScoreSummary 留在外层不重播 */}
-              <div key={tab} className="motion-safe:animate-[fadeInUp_0.28s_ease-out]">
+              <div key={tab} role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} tabIndex={0} className="outline-none motion-safe:animate-[fadeInUp_0.28s_ease-out]">
               {tab === "conduct" && (
                 <ConductTab scores={scores}
                   basePass={basePass} setBasePass={setBasePass}
@@ -149,13 +156,12 @@ export default function App() {
           </div>
 
           {/* 大屏专属底部声明（小屏由 floating ScoreSummary 承担） */}
-          <p className="hidden lg:block text-center text-xs mt-8 text-slate-400 dark:text-slate-500">
+          <p className="hidden lg:block text-center text-xs mt-8 text-slate-500 dark:text-slate-400">
             仅供参考，最终以学校/书院官方认定为准
           </p>
-        </div>
+        </main>
 
         {showExport && <ExportModal scores={scores} isDark={dark} onClose={() => setShowExport(false)} />}
       </div>
-    </div>
   );
 }

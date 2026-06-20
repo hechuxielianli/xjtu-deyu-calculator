@@ -24,12 +24,12 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
           <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">学科/科技竞赛获奖<RuleTooltip content={TOOLTIP_ACADEMIC} /></h3>
           <Badge color="ability">学术 {scores.ability.academic.toFixed(1)}/10</Badge>
         </div>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">同一项目取最高，不同项目累加。特等奖按一等奖。</p>
           <CollapsibleList
             items={academicComps}
             threshold={3}
             renderItem={(c, i) => (
-              <DynamicItem key={i} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))}
+              <DynamicItem key={c.id} onRemove={() => setAcademicComps(cs => cs.filter((_, j) => j !== i))}
                 onMoveUp={i > 0 ? () => setAcademicComps(cs => moveUp(cs, i)) : null}
                 onMoveDown={i < academicComps.length - 1 ? () => setAcademicComps(cs => moveDown(cs, i)) : null}
                 showReorder={academicComps.length > 1}
@@ -51,12 +51,12 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
         <div className="my-4 border-t border-slate-200/80 dark:border-slate-700/60" />
 
         <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">论文 / 专利 / 专著<RuleTooltip content={TOOLTIP_PAPER} /></h3>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">与竞赛合计上限 10 分</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">与竞赛合计上限 10 分</p>
           <CollapsibleList
             items={papers}
             threshold={3}
             renderItem={(p, i) => (
-              <DynamicItem key={i} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))}
+              <DynamicItem key={p.id} onRemove={() => setPapers(ps => ps.filter((_, j) => j !== i))}
                 onMoveUp={i > 0 ? () => setPapers(ps => moveUp(ps, i)) : null}
                 onMoveDown={i < papers.length - 1 ? () => setPapers(ps => moveDown(ps, i)) : null}
                 showReorder={papers.length > 1}
@@ -78,12 +78,12 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
 
       <Card>
         <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">文艺竞赛<RuleTooltip content={TOOLTIP_ART} /></h3>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">文体合计上限 6 分</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">文体合计上限 6 分</p>
         <CollapsibleList
           items={artComps}
           threshold={3}
           renderItem={(c, i) => (
-            <DynamicItem key={i} onRemove={() => setArtComps(cs => cs.filter((_, j) => j !== i))}
+            <DynamicItem key={c.id} onRemove={() => setArtComps(cs => cs.filter((_, j) => j !== i))}
               onMoveUp={i > 0 ? () => setArtComps(cs => moveUp(cs, i)) : null}
               onMoveDown={i < artComps.length - 1 ? () => setArtComps(cs => moveDown(cs, i)) : null}
               showReorder={artComps.length > 1}
@@ -109,7 +109,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
           items={sportComps}
           threshold={3}
           renderItem={(c, i) => (
-            <DynamicItem key={i} onRemove={() => setSportComps(cs => cs.filter((_, j) => j !== i))}
+            <DynamicItem key={c.id} onRemove={() => setSportComps(cs => cs.filter((_, j) => j !== i))}
               onMoveUp={i > 0 ? () => setSportComps(cs => moveUp(cs, i)) : null}
               onMoveDown={i < sportComps.length - 1 ? () => setSportComps(cs => moveDown(cs, i)) : null}
               showReorder={sportComps.length > 1}
@@ -135,7 +135,7 @@ export function AbilityTab({ scores, academicComps, setAcademicComps, papers, se
 
       <Card>
         <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">学生组织任职<RuleTooltip content={TOOLTIP_ORG} /> <Badge color="ability">上限 4</Badge></h3>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">多职务以最高分计，不累加</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">多职务以最高分计，不累加</p>
         <Field label="最高职务级别">
           <Select value={orgPosition.level} onChange={v => setOrgPosition(p => ({ ...p, level: Number(v) }))}
             options={[{ value: -1, label: "未担任职务" }, ...ORG_LEVELS.map((l, i) => ({ value: i, label: l.label }))]} />

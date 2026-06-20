@@ -20,11 +20,11 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">基准分<RuleTooltip content={TOOLTIP_BASE} /></h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">经班级评议合格、书院审定通过</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">经班级评议合格、书院审定通过</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Badge color={basePass ? "success" : "danger"}>{basePass ? "+70" : "0"}</Badge>
-            <Checkbox checked={basePass} onChange={setBasePass} label="" />
+            <Checkbox checked={basePass} onChange={setBasePass} label="" ariaLabel="基准分合格（+70）" />
           </div>
         </div>
       </Card>
@@ -51,10 +51,10 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="text-sm text-slate-600 dark:text-slate-400">次数</label>
                   <NumberInput value={collectiveCount} onChange={setCollectiveCount} min={0} max={30} />
-                  <span className="text-xs text-slate-400 dark:text-slate-500">×</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">×</span>
                   <label className="text-sm text-slate-600 dark:text-slate-400">每次</label>
                   <NumberInput value={collectivePerActivity} onChange={setCollectivePerActivity} min={0.1} max={1} step={0.05} />
-                  <span className="text-xs text-slate-400 dark:text-slate-500">分</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">分</span>
                 </div>
                 <div className="text-xs px-3 py-2 rounded-lg text-slate-500 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/50">
                   {collectiveCount} × {collectivePerActivity} = {(collectiveCount * collectivePerActivity).toFixed(1)}
@@ -131,7 +131,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
           items={penalties}
           threshold={3}
           renderItem={(p, i) => (
-            <DynamicItem key={i} onRemove={() => setPenalties(ps => ps.filter((_, j) => j !== i))}
+            <DynamicItem key={p.id} onRemove={() => setPenalties(ps => ps.filter((_, j) => j !== i))}
               onMoveUp={i > 0 ? () => setPenalties(ps => moveUp(ps, i)) : null}
               onMoveDown={i < penalties.length - 1 ? () => setPenalties(ps => moveDown(ps, i)) : null}
               showReorder={penalties.length > 1}

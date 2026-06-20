@@ -23,14 +23,14 @@ export function ScoreChart({ scores }) {
           <div key={m.label}>
             <div className="flex items-center justify-between mb-1">
               <span className={cn("text-xs font-semibold", c.text)}>{m.label}</span>
-              <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">{m.score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{m.max}</span></span>
+              <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">{m.score.toFixed(1)}<span className="text-slate-500 dark:text-slate-400">/{m.max}</span></span>
             </div>
             <div className="h-2.5 rounded-full bg-slate-200/60 dark:bg-slate-700/50 overflow-hidden">
               <div className={cn("h-full rounded-full transition-all duration-500 ease-out shadow-sm", c.bar)} style={{ width: `${Math.min(100, pct)}%` }} />
             </div>
             <div className="flex gap-2 mt-1 flex-wrap">
               {m.subs.map(s => (
-                <span key={s.l} className="text-[10px] text-slate-400 dark:text-slate-500">
+                <span key={s.l} className="text-[10px] text-slate-500 dark:text-slate-400">
                   {s.l} <span className={cn("font-mono", s.v < 0 ? "text-danger-500 dark:text-danger-400" : "text-slate-500 dark:text-slate-400")}>{s.v >= 0 ? "+" : ""}{s.v.toFixed(1)}</span>
                 </span>
               ))}

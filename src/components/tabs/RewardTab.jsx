@@ -13,14 +13,14 @@ export function RewardTab({ scores, honors, setHonors, goodDeeds, setGoodDeeds }
       <SectionTitle icon={<IconStar className="w-[18px] h-[18px]" />} title="奖励分" subtitle="荣誉表彰 + 好人好事，累加上限 5 分" score={scores.reward.total} maxScore={5} color="reward" />
       <Card>
         <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-1">荣誉表彰<RuleTooltip content={TOOLTIP_HONOR} /></h3>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
           包含精神文明荣誉、见义勇为 / 勇斗歹徒 / 舍己救人 / 拾金不昧表彰等。两类独立累加，与好人好事合计 ≤ 5 分。
         </p>
         <CollapsibleList
           items={honors}
           threshold={3}
           renderItem={(h, i) => (
-            <DynamicItem key={i} onRemove={() => setHonors(hs => hs.filter((_, j) => j !== i))}
+            <DynamicItem key={h.id} onRemove={() => setHonors(hs => hs.filter((_, j) => j !== i))}
               onMoveUp={i > 0 ? () => setHonors(hs => moveUp(hs, i)) : null}
               onMoveDown={i < honors.length - 1 ? () => setHonors(hs => moveDown(hs, i)) : null}
               showReorder={honors.length > 1}

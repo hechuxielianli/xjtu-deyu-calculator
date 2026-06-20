@@ -3,6 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- 首屏主题：在样式/内容绘制前据 localStorage 决定深浅色，消除暗色模式白屏闪烁（FOUC） -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("deyu_theme");
+          var dark = t === "dark" || (t === null && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var el = document.documentElement;
+          if (dark) el.classList.add("dark");
+          el.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
     <meta name="description" content="西安交通大学本科生德育分（综合素质测评）在线计算器" />
     <!-- Open Graph -->
     <meta property="og:title" content="西安交大德育分计算器" />

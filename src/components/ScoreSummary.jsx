@@ -21,14 +21,14 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
           <div className="flex justify-between items-baseline gap-2">
             <span className="text-slate-600 dark:text-slate-400">品行素质分</span>
             <span className="font-mono font-semibold text-right">
-              <span className="text-slate-400 dark:text-slate-500 text-xs mr-1 hidden sm:inline">(70+{scores.conduct.collective.toFixed(1)}+{scores.conduct.political.toFixed(1)}+{scores.conduct.social.toFixed(1)}{scores.conduct.penalty > 0 ? `−${scores.conduct.penalty}` : ""})</span>
+              <span className="text-slate-500 dark:text-slate-400 text-xs mr-1 hidden sm:inline">(70+{scores.conduct.collective.toFixed(1)}+{scores.conduct.political.toFixed(1)}+{scores.conduct.social.toFixed(1)}{scores.conduct.penalty > 0 ? `−${scores.conduct.penalty}` : ""})</span>
               <span className="text-conduct-600 dark:text-conduct-300">{scores.conduct.total.toFixed(1)}</span>
             </span>
           </div>
           <div className="flex justify-between items-baseline gap-2">
             <span className="text-slate-600 dark:text-slate-400">能力拓展分</span>
             <span className="font-mono font-semibold text-right">
-              <span className="text-slate-400 dark:text-slate-500 text-xs mr-1 hidden sm:inline">({scores.ability.academic.toFixed(1)}+{scores.ability.artSport.toFixed(1)}+{scores.ability.org.toFixed(1)})</span>
+              <span className="text-slate-500 dark:text-slate-400 text-xs mr-1 hidden sm:inline">({scores.ability.academic.toFixed(1)}+{scores.ability.artSport.toFixed(1)}+{scores.ability.org.toFixed(1)})</span>
               <span className="text-ability-600 dark:text-ability-300">{scores.ability.total.toFixed(1)}</span>
             </span>
           </div>
@@ -56,7 +56,7 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
       </button>
 
       {!isSidebar && (
-        <p className="text-center text-xs mt-2 text-slate-400 dark:text-slate-500">
+        <p className="text-center text-xs mt-2 text-slate-500 dark:text-slate-400">
           仅供参考，最终以学校/书院官方认定为准
         </p>
       )}
