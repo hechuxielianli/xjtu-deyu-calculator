@@ -156,7 +156,7 @@ export default function App() {
           </p>
         </main>
 
-        {showExport && <ExportModal scores={scores} isDark={dark} onClose={() => setShowExport(false)} />}
+        {showExport && <ExportModal scores={scores} data={stateObj} isDark={dark} onClose={() => setShowExport(false)} />}
       </div>
   );
 }

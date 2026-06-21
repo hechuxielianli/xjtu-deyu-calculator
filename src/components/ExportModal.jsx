@@ -1,5 +1,111 @@
 import { useEffect, useRef } from "react";
+// 嵌入精致中文字体（自托管，随 Vite 打包到同源，规避 Google 字体 CDN 国内不可达）
+import "@fontsource/noto-sans-sc/400.css";
+import "@fontsource/noto-sans-sc/700.css";
 import { IconX, IconCamera, IconPrinter, IconArrowUpRight } from "./icons";
+import { ACADEMIC_COMP, PAPER_SCORES, ART_COMP, SPORT_COMP, ORG_LEVELS, HONOR_LEVELS, PENALTY_TYPES } from "../data/constants";
+import { getAcademicCompScore, getPaperScore, getArtScore, getSportScore } from "../hooks/useScoreCalculator";
+
+// Canvas 用字体栈（Noto Sans SC 就绪后生效，未就绪回退系统黑体）
+const FONT = "'Noto Sans SC','Microsoft YaHei',sans-serif";
+
+// 枚举文案映射（与各 Tab 下拉选项一致）
+const AWARD_LABEL = { special: "特等奖", first: "一等奖", second: "二等奖", third: "三等奖", excellence: "优秀奖" };
+const RANK_LABEL = { r1: "第1名", r2: "第2名", r3: "第3名", r48: "4-8名" };
+const RATING_LABEL = { excellent: "优", good: "良", pass: "合格" };
+
+// 绘制前用它预载对应字形切片（@fontsource 按 unicode-range 切片，需覆盖全部可能字符）
+const FONT_SAMPLE = [
+  "西安交通大学综合素质测评得分依据本科生专业选择内容及评分标准",
+  "总分得分明细每一项逐条列示仅供参考最终以学校书院官方认定为准生成于距满分",
+  "品行素质能力拓展奖励分基准集体活动突出贡献手动项思政基础培训省级优秀学员",
+  "志愿服务社会实践政府实习市先进个人荣誉表彰好人好事破纪录组织任职文艺体育学科竞赛",
+  Object.values(ACADEMIC_COMP).map((v) => v.label).join(""),
+  Object.values(PAPER_SCORES).map((v) => v.label).join(""),
+  Object.values(ART_COMP).map((v) => v.label).join(""),
+  Object.values(SPORT_COMP).map((v) => v.label).join(""),
+  ORG_LEVELS.map((v) => v.label).join(""),
+  HONOR_LEVELS.map((v) => v.label).join(""),
+  PENALTY_TYPES.map((v) => v.label).join(""),
+  Object.values(AWARD_LABEL).join(""), Object.values(RANK_LABEL).join(""), Object.values(RATING_LABEL).join(""),
+  "0123456789+-.×/h第作者级名党委副书记院团支社长班干事甲乙",
+].join("");
+
+// 由原始输入数据构造三模块的逐项明细（复用计算器导出的单项助手与常量标签）
+function buildBreakdown(scores, data) {
+  const d = data || {};
+
+  // 品行素质
+  const conduct = [];
+  conduct.push({ label: "基准分", value: d.basePass ? 70 : 0 });
+  if (scores.conduct.collective > 0) {
+    let cl = "集体活动";
+    if (d.collectiveOutstanding) cl = "集体活动 · 突出贡献";
+    else if (d.collectiveMode === "count") cl = `集体活动 · ${d.collectiveCount || 0} 项`;
+    else cl = "集体活动 · 手动";
+    conduct.push({ label: cl, value: scores.conduct.collective });
+  }
+  const ps = d.politicalStudy || {};
+  if (ps.basic) conduct.push({ label: "思政 · 基础培训", value: 1 });
+  if (ps.provincial) conduct.push({ label: "思政 · 省级培训", value: 2 });
+  if (ps.outstanding && (ps.basic || ps.provincial)) conduct.push({ label: "思政 · 优秀学员", value: 1 });
+  const ss = d.socialService || {};
+  const vh = ss.volunteerHours || 0;
+  if (vh > 0) conduct.push({ label: `志愿服务 · ${vh}h`, value: Math.min(1, vh / 32) });
+  if (ss.socialPractice) conduct.push({ label: "社会实践", value: 1 });
+  if (ss.internLevel === "city") conduct.push({ label: "政府实习 · 市级", value: 1 });
+  if (ss.internLevel === "province") conduct.push({ label: "政府实习 · 省级", value: 2 });
+  const hasAnyService = vh > 0 || ss.socialPractice || (ss.internLevel && ss.internLevel !== "none");
+  if (ss.advancedIndividual && hasAnyService) conduct.push({ label: "社会服务 · 先进个人", value: 1 });
+  (d.penalties || []).forEach((p) => {
+    const t = PENALTY_TYPES[p.type];
+    if (!t) return;
+    const cnt = p.count || 1;
+    conduct.push({ label: `${t.label}${cnt > 1 ? ` ×${cnt}` : ""}`, value: -(t.score * cnt) });
+  });
+
+  // 能力拓展
+  const ability = [];
+  (d.academicComps || []).forEach((c) => {
+    ability.push({ label: `学科竞赛 · ${ACADEMIC_COMP[c.level]?.label || ""} ${AWARD_LABEL[c.award] || ""}`.trim(), value: getAcademicCompScore(c) });
+  });
+  (d.papers || []).forEach((p) => {
+    const t = PAPER_SCORES[p.type];
+    ability.push({ label: `${t?.label || "论文"} · 第${p.authorRank}作者${p.outstandingPaper ? " · 优秀" : ""}`, value: getPaperScore(p) });
+  });
+  (d.artComps || []).forEach((c) => {
+    ability.push({ label: `文艺 · ${ART_COMP[c.level]?.label || ""} ${AWARD_LABEL[c.award] || ""}`.trim(), value: getArtScore(c) });
+  });
+  (d.sportComps || []).forEach((c) => {
+    ability.push({ label: `体育 · ${SPORT_COMP[c.level]?.label || ""} ${RANK_LABEL[c.rank] || ""}`.trim(), value: getSportScore(c) });
+  });
+  if (d.recordBreak === "provincial") ability.push({ label: "破纪录 · 省级", value: 5 });
+  else if (d.recordBreak === "school") ability.push({ label: "破纪录 · 校级", value: 3 });
+  const op = d.orgPosition || {};
+  if (op.level >= 0 && op.rating && op.rating !== "none") {
+    const lvl = ORG_LEVELS[op.level];
+    if (lvl) ability.push({ label: `组织任职 · ${lvl.label.split("（")[0]} · ${RATING_LABEL[op.rating] || op.rating}`, value: lvl.scores?.[op.rating] || 0 });
+  }
+
+  // 奖励分
+  const reward = [];
+  (d.honors || []).forEach((h) => {
+    const lvl = HONOR_LEVELS[h.level];
+    if (lvl) reward.push({ label: `${lvl.label}荣誉`, value: lvl.score });
+  });
+  if ((d.goodDeeds || 0) > 0) reward.push({ label: `好人好事 ×${d.goodDeeds}`, value: d.goodDeeds });
+
+  return [
+    { name: "品行素质", colorKey: "conduct", subtotal: scores.conduct.total, max: 80, rows: conduct },
+    { name: "能力拓展", colorKey: "ability", subtotal: scores.ability.total, max: 20, rows: ability },
+    { name: "奖励分", colorKey: "reward", subtotal: scores.reward.total, max: 5, rows: reward },
+  ];
+}
+
+// 一个明细模块段的高度（顶端 topY 起算，与 drawSection 严格一致）
+// 段头到首行留白 60、行高 30、段底留白 16 → sectionHeight(1)=76
+const SECTION_ROW = 30, SECTION_FIRST_ROW = 60, SECTION_PAD_BOTTOM = 16;
+const sectionHeight = (n) => SECTION_FIRST_ROW + (Math.max(n, 1) - 1) * SECTION_ROW + SECTION_PAD_BOTTOM;
 
 // ── Canvas 用色镜像（与 src/index.css 的 @theme 保持一致） ──
 // Tailwind class 在 Canvas 中无效，所以单独维护一份十六进制色镜像
@@ -69,22 +175,33 @@ function hexA(hex, a) {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-function drawExportImage(scores, isDark, logoImg) {
-  const W = 920, H = 640, dpr = window.devicePixelRatio || 2;
+function drawExportImage(scores, data, isDark, logoImg) {
+  const c = isDark ? EXPORT_COLORS.dark : EXPORT_COLORS.light;
+  const font = FONT;
+  const TAU = Math.PI * 2;
+  const W = 920, L = 56, R = W - 56;
+
+  // ── 逐项明细 + 动态高度测算 ──
+  const sections = buildBreakdown(scores, data);
+  const [secC, secA, secR] = sections;
+  const colTop = 436;                       // 明细双栏起点
+  const leftH = sectionHeight(secC.rows.length);
+  const rightH = sectionHeight(secA.rows.length) + 26 + sectionHeight(secR.rows.length);
+  const contentBottom = colTop + Math.max(leftH, rightH);
+  const footerDivY = contentBottom + 30;
+  const footerY = footerDivY + 26;
+  const H = footerY + 38;
+
+  const dpr = window.devicePixelRatio || 2;
   const canvas = document.createElement("canvas");
   canvas.width = W * dpr; canvas.height = H * dpr;
   const ctx = canvas.getContext("2d");
   ctx.scale(dpr, dpr);
 
-  const c = isDark ? EXPORT_COLORS.dark : EXPORT_COLORS.light;
-  const font = "'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif";
-  const mono = "'SF Mono','Menlo','Consolas',monospace";
-  const TAU = Math.PI * 2;
-
   // 纯纸面背景
   ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
 
-  // 卡片：柔和投影 + 描边 + 顶部交大蓝压条（证书质感）
+  // 卡片：柔和投影 + 描边 + 顶部交大蓝→金压条（证书质感）
   ctx.save();
   ctx.shadowColor = isDark ? "rgba(0,0,0,0.55)" : "rgba(15,23,42,0.12)";
   ctx.shadowBlur = 26; ctx.shadowOffsetY = 10;
@@ -101,152 +218,140 @@ function drawExportImage(scores, isDark, logoImg) {
   ctx.fillStyle = topBar; ctx.fillRect(24, 24, W - 48, 4);
   ctx.restore();
 
-  const L = 56, R = W - 56;
-
-  // ── 页眉 ──
-  if (logoImg) { try { ctx.drawImage(logoImg, L, 40, 44, 44); } catch { /* ignore */ } }
-  const tx = logoImg ? L + 58 : L;
+  // ── 页眉（横幅 logo + 精简标题）──
+  const bw = logoImg && logoImg.naturalHeight ? 44 * (logoImg.naturalWidth / logoImg.naturalHeight) : 0;
+  if (logoImg && bw) {
+    try {
+      if (isDark) ctx.filter = "brightness(1.7)";   // 蓝色横幅在暗底上提亮以保证可读
+      ctx.drawImage(logoImg, L, 38, bw, 44);
+      ctx.filter = "none";
+    } catch { ctx.filter = "none"; }
+  }
+  const tx = logoImg && bw ? L + bw + 20 : L;
   ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
-  ctx.fillStyle = c.tp; ctx.font = `bold 20px ${font}`;
-  ctx.fillText("西安交通大学 · 综合素质测评得分", tx, 60);
-  ctx.fillStyle = c.tm; ctx.font = `12px ${font}`;
-  ctx.fillText("依据《本科生专业选择综合素质测评内容及评分标准》", tx, 82);
+  ctx.fillStyle = c.tp; ctx.font = `bold 22px ${font}`;
+  ctx.fillText("综合素质测评得分", tx, 58);
+  ctx.fillStyle = c.tm; ctx.font = `13px ${font}`;
+  ctx.fillText("依据《本科生专业选择综合素质测评内容及评分标准》", tx, 80);
   const hd = new Date();
   const dateStr = `${hd.getFullYear()}-${String(hd.getMonth() + 1).padStart(2, "0")}-${String(hd.getDate()).padStart(2, "0")}`;
-  ctx.fillStyle = c.tm; ctx.font = `12px ${font}`; ctx.textAlign = "right";
-  ctx.fillText(dateStr, R, 60);
+  ctx.fillStyle = c.tm; ctx.font = `13px ${font}`; ctx.textAlign = "right";
+  ctx.fillText(dateStr, R, 56);
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(L, 104); ctx.lineTo(R, 104); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(L, 106); ctx.lineTo(R, 106); ctx.stroke();
 
-  // ── 左·环形仪表（三段彩环 + 环心大号总分）──
-  const cx = 204, cy = 292, rr = 124, rw = 22;
+  // ══ 汇总带 ══
+  // 左·环形仪表（三段彩环 + 环心蓝→金总分）
+  const cx = 204, cy = 248, rr = 96, rw = 22;
   ctx.beginPath(); ctx.arc(cx, cy, rr, 0, TAU);
   ctx.strokeStyle = c.track; ctx.lineWidth = rw; ctx.lineCap = "butt"; ctx.stroke();
-  const segs = [
-    { v: scores.conduct.total, color: c.conduct },
-    { v: scores.ability.total, color: c.ability },
-    { v: scores.reward.total, color: c.reward },
-  ];
   let a0 = -Math.PI / 2;
-  segs.forEach((s) => {
-    const frac = Math.max(0, s.v) / 105;
+  sections.forEach((s) => {
+    const frac = Math.max(0, s.subtotal) / 105;
     if (frac <= 0.0008) return;
     const a1 = a0 + frac * TAU;
-    arcSegment(ctx, cx, cy, rr, a0, a1, rw, s.color);
+    arcSegment(ctx, cx, cy, rr, a0, a1, rw, c[s.colorKey]);
     a0 = a1;
   });
   ctx.textAlign = "center";
   ctx.fillStyle = c.tm; ctx.font = `14px ${font}`;
-  ctx.fillText("总分", cx, cy - 38);
-  const totalGrad = ctx.createLinearGradient(cx - 72, cy, cx + 72, cy);
+  ctx.fillText("总分", cx, cy - 34);
+  const totalGrad = ctx.createLinearGradient(cx - 70, cy, cx + 70, cy);
   totalGrad.addColorStop(0, c.brand); totalGrad.addColorStop(1, c.accent);
-  ctx.fillStyle = totalGrad; ctx.font = `bold 60px ${mono}`;
-  ctx.fillText(scores.total.toFixed(1), cx, cy + 18);
+  ctx.fillStyle = totalGrad; ctx.font = `bold 54px ${font}`;
+  ctx.fillText(scores.total.toFixed(1), cx, cy + 16);
   ctx.fillStyle = c.tm; ctx.font = `15px ${font}`;
-  ctx.fillText("/ 105", cx, cy + 44);
+  ctx.fillText("/ 105", cx, cy + 40);
 
-  // 图例（环下，横排居中）
-  const legend = [
-    { label: "品行", v: scores.conduct.total, color: c.conduct },
-    { label: "能力", v: scores.ability.total, color: c.ability },
-    { label: "奖励", v: scores.reward.total, color: c.reward },
-  ];
-  ctx.font = `12px ${font}`;
-  const lgGap = 18;
-  const lgW = legend.map((e) => 14 + ctx.measureText(`${e.label} ${e.v.toFixed(1)}`).width);
-  let lx = cx - (lgW.reduce((s, w) => s + w, 0) + lgGap * (legend.length - 1)) / 2;
-  legend.forEach((e, i) => {
-    ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(lx + 4, 456, 4, 0, TAU); ctx.fill();
-    ctx.fillStyle = c.ts; ctx.textAlign = "left"; ctx.fillText(`${e.label} ${e.v.toFixed(1)}`, lx + 14, 460);
-    lx += lgW[i] + lgGap;
-  });
-
-  // 总分进度条 + 距满分（填充左下、补充信息）
-  const remain = Math.max(0, 105 - scores.total);
-  const pbX = 86, pbW = 236, pbY = 506;
-  ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `12px ${font}`;
-  ctx.fillText("距满分", pbX, pbY - 8);
-  ctx.textAlign = "right"; ctx.fillStyle = c.tp; ctx.font = `bold 13px ${mono}`;
-  ctx.fillText(`${remain.toFixed(1)} 分`, pbX + pbW, pbY - 8);
-  ctx.fillStyle = c.track; roundRect(ctx, pbX, pbY, pbW, 8, 4, true);
-  const tpw = Math.min(1, scores.total / 105) * pbW;
-  if (tpw > 1) {
-    const pg = ctx.createLinearGradient(pbX, 0, pbX + pbW, 0);
-    pg.addColorStop(0, c.brand); pg.addColorStop(1, c.accent);
-    ctx.fillStyle = pg; roundRect(ctx, pbX, pbY, Math.max(tpw, 8), 8, 4, true);
-  }
-
-  // 竖向分隔线
+  // 竖向分隔线（环与右侧 tile 间）
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(356, 116); ctx.lineTo(356, H - 64); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(360, 150); ctx.lineTo(360, 348); ctx.stroke();
 
-  // ── 右·模块明细（三模块色淡底卡片 + 迷你进度条）──
-  const modules = [
-    { name: "品行素质", color: c.conduct, score: scores.conduct.total, max: 80, items: [
-      ["基准分", scores.conduct.base], ["集体活动", scores.conduct.collective], ["思政学习", scores.conduct.political],
-      ["社会服务", scores.conduct.social], ...(scores.conduct.penalty > 0 ? [["扣分", -scores.conduct.penalty]] : [])] },
-    { name: "能力拓展", color: c.ability, score: scores.ability.total, max: 20, items: [
-      ["学术科研", scores.ability.academic], ["文体竞赛", scores.ability.artSport], ["组织任职", scores.ability.org]] },
-    { name: "奖励分", color: c.reward, score: scores.reward.total, max: 5, items: [
-      ["荣誉表彰", scores.reward.honor], ["好人好事", scores.reward.deeds]] },
-  ];
-  const cardX = 376, cardIW = R - cardX, pad = 16;
-  let cardY = 118;
-  modules.forEach((m) => {
-    const ih = m.items.length;
-    const cardH = 64 + ih * 21;
-    const ix = cardX + pad, iw = cardIW - pad * 2, ixr = cardX + cardIW - pad;
-    // 淡色底 + 同色描边
-    ctx.fillStyle = hexA(m.color, isDark ? 0.13 : 0.06);
-    roundRect(ctx, cardX, cardY, cardIW, cardH, 12, true);
-    ctx.strokeStyle = hexA(m.color, isDark ? 0.34 : 0.22); ctx.lineWidth = 1;
-    roundRect(ctx, cardX, cardY, cardIW, cardH, 12, false, true);
-    // 头部：色点 + 模块名（着模块色）+ 得分 / 上限
-    const hy = cardY + 30;
-    ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(ix + 5, hy - 4, 5, 0, TAU); ctx.fill();
-    ctx.fillStyle = m.color; ctx.font = `bold 15px ${font}`; ctx.textAlign = "left";
-    ctx.fillText(m.name, ix + 18, hy);
-    ctx.font = `12px ${mono}`; ctx.fillStyle = c.tm; ctx.textAlign = "right";
-    const maxText = `/${m.max}`, maxW = ctx.measureText(maxText).width;
-    ctx.fillText(maxText, ixr, hy);
-    ctx.font = `bold 19px ${mono}`; ctx.fillStyle = c.tp;
-    ctx.fillText(m.score.toFixed(1), ixr - maxW - 3, hy);
-    // 迷你进度条（轨道为模块色淡底）
-    const by = cardY + 44;
-    ctx.fillStyle = hexA(m.color, isDark ? 0.22 : 0.16); roundRect(ctx, ix, by, iw, 6, 3, true);
-    const pw = Math.min(1, m.max > 0 ? m.score / m.max : 0) * iw;
-    if (pw > 0.5) { ctx.fillStyle = m.color; roundRect(ctx, ix, by, Math.max(pw, 6), 6, 3, true); }
-    // 明细行
-    let iy = cardY + 68;
-    m.items.forEach(([name, val]) => {
-      ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `13px ${font}`;
-      ctx.fillText(name, ix, iy);
-      const nameW = ctx.measureText(name).width;
-      const valText = (val >= 0 ? "+" : "") + val.toFixed(1);
-      ctx.font = `13px ${mono}`; const valW = ctx.measureText(valText).width;
-      const ds = ix + nameW + 6, de = ixr - valW - 6;
-      if (de > ds) { ctx.fillStyle = c.dots; for (let dx = ds; dx < de; dx += 6) ctx.fillRect(dx, iy - 4, 2, 1); }
-      ctx.textAlign = "right"; ctx.fillStyle = val < 0 ? c.danger : c.tp; ctx.font = `13px ${mono}`;
-      ctx.fillText(valText, ixr, iy);
-      iy += 21;
-    });
-    cardY += cardH + 20;
+  // 右·三模块小计 tile（汇总）
+  const tileX = 392, tileXR = R, tileTops = [162, 228, 294];
+  sections.forEach((s, i) => {
+    const tY = tileTops[i], col = c[s.colorKey];
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(tileX + 6, tY + 13, 5.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = col; ctx.font = `bold 16px ${font}`; ctx.textAlign = "left";
+    ctx.fillText(s.name, tileX + 20, tY + 18);
+    ctx.font = `13px ${font}`; ctx.fillStyle = c.tm; ctx.textAlign = "right";
+    const mx = `/${s.max}`, mxW = ctx.measureText(mx).width;
+    ctx.fillText(mx, tileXR, tY + 18);
+    ctx.font = `bold 21px ${font}`; ctx.fillStyle = c.tp;
+    ctx.fillText(s.subtotal.toFixed(1), tileXR - mxW - 4, tY + 18);
+    const tbY = tY + 30, tbW = tileXR - tileX;
+    ctx.fillStyle = hexA(col, isDark ? 0.22 : 0.16); roundRect(ctx, tileX, tbY, tbW, 7, 3.5, true);
+    const pw = Math.min(1, s.max > 0 ? s.subtotal / s.max : 0) * tbW;
+    if (pw > 0.5) { ctx.fillStyle = col; roundRect(ctx, tileX, tbY, Math.max(pw, 7), 7, 3.5, true); }
   });
+
+  // ══ 明细带 ══
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, 366); ctx.lineTo(R, 366); ctx.stroke();
+  ctx.fillStyle = c.brand; roundRect(ctx, L, 384, 4, 18, 2, true);
+  ctx.fillStyle = c.tp; ctx.font = `bold 18px ${font}`; ctx.textAlign = "left";
+  ctx.fillText("得分明细", L + 14, 400);
+  const dtW = ctx.measureText("得分明细").width;
+  ctx.fillStyle = c.tm; ctx.font = `13px ${font}`;
+  ctx.fillText("每一项得分逐条列示", L + 14 + dtW + 12, 400);
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, 412); ctx.lineTo(R, 412); ctx.stroke();
+
+  // 一个模块段：色条 + 模块名 + 小计 + 下划线 + 逐项行；返回段底部 y
+  const drawSection = (topY, x0, x1, s) => {
+    const col = c[s.colorKey];
+    ctx.fillStyle = col; roundRect(ctx, x0, topY + 4, 4, 18, 2, true);
+    ctx.fillStyle = col; ctx.font = `bold 16px ${font}`; ctx.textAlign = "left";
+    ctx.fillText(s.name, x0 + 14, topY + 18);
+    ctx.font = `13px ${font}`; ctx.fillStyle = c.tm; ctx.textAlign = "right";
+    const mt = ` / ${s.max}`, mtW = ctx.measureText(mt).width;
+    ctx.fillText(mt, x1, topY + 18);
+    ctx.font = `bold 15px ${font}`; ctx.fillStyle = c.tp;
+    ctx.fillText(s.subtotal.toFixed(1), x1 - mtW - 2, topY + 18);
+    ctx.strokeStyle = hexA(col, isDark ? 0.45 : 0.32); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0, topY + 30); ctx.lineTo(x1, topY + 30); ctx.stroke();
+    const rows = s.rows;
+    if (rows.length === 0) {
+      ctx.textAlign = "left"; ctx.fillStyle = c.tm; ctx.font = `15px ${font}`;
+      ctx.fillText("暂无得分项", x0, topY + SECTION_FIRST_ROW);
+    }
+    rows.forEach((row, i) => {
+      const ry = topY + SECTION_FIRST_ROW + i * SECTION_ROW;
+      ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `15px ${font}`;
+      ctx.fillText(row.label, x0, ry);
+      const nameW = ctx.measureText(row.label).width;
+      const valText = (row.value >= 0 ? "+" : "") + row.value.toFixed(1);
+      ctx.font = `15px ${font}`; const valW = ctx.measureText(valText).width;
+      const ds = x0 + nameW + 8, de = x1 - valW - 8;
+      if (de > ds) { ctx.fillStyle = c.dots; for (let dx = ds; dx < de; dx += 6) ctx.fillRect(dx, ry - 5, 2, 1); }
+      ctx.textAlign = "right"; ctx.fillStyle = row.value < 0 ? c.danger : c.tp;
+      ctx.fillText(valText, x1, ry);
+    });
+    return topY + sectionHeight(rows.length);
+  };
+
+  const lX0 = L, lX1 = 452, rX0 = 484, rX1 = R, divX = 468;
+  // 竖向发丝线分两栏
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(divX, 426); ctx.lineTo(divX, contentBottom); ctx.stroke();
+  drawSection(colTop, lX0, lX1, secC);                          // 左栏：品行
+  const aBottom = drawSection(colTop, rX0, rX1, secA);          // 右栏：能力
+  drawSection(aBottom + 26, rX0, rX1, secR);                    //       奖励
 
   // ── 页脚 ──
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(L, H - 54); ctx.lineTo(R, H - 54); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(L, footerDivY); ctx.lineTo(R, footerDivY); ctx.stroke();
   const now = new Date();
   const ts2 = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  ctx.fillStyle = c.tm; ctx.font = `11px ${font}`; ctx.textAlign = "left";
-  ctx.fillText("仅供参考，最终以学校 / 书院官方认定为准", L, H - 32);
-  ctx.font = `10px ${font}`; ctx.textAlign = "right";
-  ctx.fillText(`生成于 ${ts2}`, R, H - 32);
+  ctx.fillStyle = c.tm; ctx.font = `12px ${font}`; ctx.textAlign = "left";
+  ctx.fillText("仅供参考，最终以学校 / 书院官方认定为准", L, footerY);
+  ctx.font = `12px ${font}`; ctx.textAlign = "right";
+  ctx.fillText(`生成于 ${ts2}`, R, footerY);
 
   return canvas;
 }
 
-export function ExportModal({ scores, isDark, onClose }) {
+export function ExportModal({ scores, data, isDark, onClose }) {
   const canvasRef = useRef(null);
   const previewRef = useRef(null);
   const dialogRef = useRef(null);
@@ -281,19 +386,48 @@ export function ExportModal({ scores, isDark, onClose }) {
   }, [onClose]);
 
   useEffect(() => {
-    const logoImg = new Image();
-    logoImg.crossOrigin = "anonymous";
-    logoImg.src = "/xjtublue.png";
+    let cancelled = false;
 
     const render = (img) => {
-      const c = drawExportImage(scores, isDark, img);
+      if (cancelled) return;
+      const c = drawExportImage(scores, data, isDark, img);
       canvasRef.current = c;
       if (previewRef.current) { previewRef.current.innerHTML = ""; c.style.width = "100%"; c.style.height = "auto"; c.style.borderRadius = "8px"; previewRef.current.appendChild(c); }
     };
 
-    logoImg.onload = () => render(logoImg);
-    logoImg.onerror = () => render(null);
-  }, [scores, isDark]);
+    const loadLogo = () => new Promise((res) => {
+      const im = new Image();
+      im.crossOrigin = "anonymous";
+      im.onload = () => res(im);
+      im.onerror = () => res(null);
+      im.src = "/blue-banner-logo.png";
+    });
+
+    const start = async () => {
+      const img = await loadLogo();
+      if (cancelled) return;
+      // 首帧：尽量等 Noto Sans SC 字形切片就绪，但最多等 2.8s，避免预览卡白
+      try {
+        if (document.fonts && document.fonts.load) {
+          await Promise.race([
+            Promise.all([
+              document.fonts.load("400 16px 'Noto Sans SC'", FONT_SAMPLE),
+              document.fonts.load("700 16px 'Noto Sans SC'", FONT_SAMPLE),
+            ]),
+            new Promise((r) => setTimeout(r, 2800)),
+          ]);
+        }
+      } catch { /* ignore — fallback font */ }
+      render(img);
+      // 若首帧时字体尚未就绪，待全部就绪后再重绘一次，确保最终图用 Noto
+      try {
+        if (document.fonts && document.fonts.ready) { await document.fonts.ready; render(img); }
+      } catch { /* ignore */ }
+    };
+    start();
+
+    return () => { cancelled = true; };
+  }, [scores, data, isDark]);
 
   const saveImage = () => {
     if (!canvasRef.current) return;
