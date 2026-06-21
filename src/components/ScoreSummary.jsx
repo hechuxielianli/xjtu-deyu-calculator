@@ -1,4 +1,4 @@
-import { Card } from "./ui";
+import { Card, AnimatedNumber } from "./ui";
 import { cn } from "../utils/cn";
 import { ScoreChart } from "./ScoreChart";
 import { IconShare, IconSigma } from "./icons";
@@ -22,22 +22,22 @@ export function ScoreSummary({ scores, onExport, variant = "floating", className
             <span className="text-slate-600 dark:text-slate-400">品行素质分</span>
             <span className="font-mono font-semibold text-right">
               <span className="text-slate-500 dark:text-slate-400 text-xs mr-1 hidden sm:inline">(70+{scores.conduct.collective.toFixed(1)}+{scores.conduct.political.toFixed(1)}+{scores.conduct.social.toFixed(1)}{scores.conduct.penalty > 0 ? `−${scores.conduct.penalty}` : ""})</span>
-              <span className="text-slate-900 dark:text-slate-100">{scores.conduct.total.toFixed(1)}</span>
+              <AnimatedNumber value={scores.conduct.total} className="text-slate-900 dark:text-slate-100" />
             </span>
           </div>
           <div className="flex justify-between items-baseline gap-2">
             <span className="text-slate-600 dark:text-slate-400">能力拓展分</span>
             <span className="font-mono font-semibold text-right">
               <span className="text-slate-500 dark:text-slate-400 text-xs mr-1 hidden sm:inline">({scores.ability.academic.toFixed(1)}+{scores.ability.artSport.toFixed(1)}+{scores.ability.org.toFixed(1)})</span>
-              <span className="text-slate-900 dark:text-slate-100">{scores.ability.total.toFixed(1)}</span>
+              <AnimatedNumber value={scores.ability.total} className="text-slate-900 dark:text-slate-100" />
             </span>
           </div>
           <div className="flex justify-between"><span className="text-slate-600 dark:text-slate-400">奖励分</span>
-            <span className="font-mono font-semibold text-slate-900 dark:text-slate-100">{scores.reward.total.toFixed(1)}</span>
+            <AnimatedNumber value={scores.reward.total} className="font-mono font-semibold text-slate-900 dark:text-slate-100" />
           </div>
           <div className="border-t pt-2 flex justify-between items-baseline border-slate-200/80 dark:border-white/10">
             <span className="font-semibold text-slate-800 dark:text-slate-100">总分</span>
-            <span className="font-mono text-2xl font-bold tabular-nums text-brand-700 dark:text-brand-300">{scores.total.toFixed(1)}</span>
+            <AnimatedNumber value={scores.total} className="font-mono text-2xl font-bold text-brand-700 dark:text-brand-300" />
           </div>
         </div>
       </Card>

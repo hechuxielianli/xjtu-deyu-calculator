@@ -1,6 +1,14 @@
 import { useState, useRef } from "react";
 import { IconCheck, IconPlus, IconX, IconChevronUp, IconChevronDown } from "./icons";
 import { cn } from "../utils/cn";
+import { useCountUp } from "../hooks/useCountUp";
+
+// 数字 count-up 展示：内部用 useCountUp 补间，reduced-motion 自动落终值。
+// 配合 tabular-nums 防止滚动时宽度抖动。
+export function AnimatedNumber({ value, decimals = 1, duration = 550, startOnMount = false, className }) {
+  const v = useCountUp(value, { duration, startOnMount });
+  return <span className={cn("tabular-nums", className)}>{v.toFixed(decimals)}</span>;
+}
 
 // ── 极简留白·纯净近单色原子库 ──
 // 墨/纸灰阶 + 单一交大蓝强调；扁平、发丝线、大留白、无玻璃/无重阴影。
@@ -71,8 +79,12 @@ const FIELD_CLASS = cn(
 
 export function Select({ value, onChange, options, className }) {
   return (
-    <select value={value} onChange={e => onChange(e.target.value)} className={cn(FIELD_CLASS, "cursor-pointer", className)}>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+    // color-scheme 让原生下拉弹层在暗色下渲染为深色；option 再显式着色，确保跨浏览器可读
+    <select value={value} onChange={e => onChange(e.target.value)}
+      className={cn(FIELD_CLASS, "cursor-pointer [color-scheme:light] dark:[color-scheme:dark]", className)}>
+      {options.map(o => (
+        <option key={o.value} value={o.value} className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100">{o.label}</option>
+      ))}
     </select>
   );
 }
@@ -148,7 +160,7 @@ export function AddButton({ onClick, label }) {
 export function DynamicItem({ children, onRemove, onMoveUp, onMoveDown, score, showReorder }) {
   const neg = score !== undefined && score < 0;
   return (
-    <div className="flex items-start gap-2 p-3 rounded-xl mb-2 border border-slate-200/80 dark:border-white/10 bg-transparent transition-colors hover:border-slate-300 dark:hover:border-white/20">
+    <div className="flex items-start gap-2 p-3 rounded-xl mb-2 border border-slate-200/80 dark:border-white/10 bg-transparent transition-colors hover:border-slate-300 dark:hover:border-white/20 motion-safe:animate-[popInRow_0.34s_ease-out]">
       <div className="flex-1 flex flex-wrap gap-2 items-end">{children}</div>
       <div className="flex items-center gap-1 pt-1 shrink-0">
         {score !== undefined && (

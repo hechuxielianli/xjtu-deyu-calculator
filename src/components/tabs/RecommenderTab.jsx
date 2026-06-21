@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, Badge, SectionTitle, Select, Checkbox } from "../ui";
+import { Card, Badge, SectionTitle, Select, Checkbox, AnimatedNumber } from "../ui";
 import { cn } from "../../utils/cn";
 import { IconX, IconCalculator } from "../icons";
 import {
@@ -56,19 +56,21 @@ function ResultBody({ result, onExclude, fadingId }) {
       <div className="grid grid-cols-3 gap-2 mb-4 text-center">
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">目标分差</div>
-          <div className="font-mono text-[15px] font-semibold text-slate-700 dark:text-slate-200">+{result.gap.toFixed(1)}</div>
+          <div className="font-mono text-[15px] font-semibold text-slate-700 dark:text-slate-200">+<AnimatedNumber value={result.gap} startOnMount duration={1000} /></div>
         </div>
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">实际增量</div>
-          <div className="font-mono text-sm font-semibold text-brand-700 dark:text-brand-300">+{result.achievable.toFixed(1)}</div>
+          <div className="font-mono text-sm font-semibold text-brand-700 dark:text-brand-300">+<AnimatedNumber value={result.achievable} startOnMount duration={1000} /></div>
         </div>
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">总时长</div>
-          <div className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">{result.cost} 小时</div>
+          <div className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-200"><AnimatedNumber value={result.cost} decimals={0} startOnMount duration={1000} /> 小时</div>
         </div>
       </div>
       <div className="space-y-2">
-        {Object.entries(grouped).map(([m, items]) => (
+        {(() => {
+          let gi = 0;
+          return Object.entries(grouped).map(([m, items]) => (
           <div key={m}>
             <div className="flex items-center gap-2 mb-1">
               <Badge color={MODULE_META[m]?.color || "neutral"}>{MODULE_META[m]?.label || m}</Badge>
@@ -79,12 +81,15 @@ function ResultBody({ result, onExclude, fadingId }) {
             <ul className="space-y-1 ml-1">
               {items.map((c) => {
                 const fading = fadingId === c.id;
+                const delay = gi++ * 90;
                 return (
                   <li
                     key={c.id}
+                    style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
                     className={cn(
                       "flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-all duration-200",
                       "bg-transparent border border-slate-200/80 dark:border-white/10",
+                      "motion-safe:animate-[fadeInUp_0.45s_ease-out]",
                       fading ? "opacity-30 line-through" : "opacity-100",
                     )}
                   >
@@ -108,7 +113,8 @@ function ResultBody({ result, onExclude, fadingId }) {
               })}
             </ul>
           </div>
-        ))}
+          ));
+        })()}
       </div>
     </>
   );
@@ -123,7 +129,9 @@ export function RecommenderTab({ scores, state }) {
   const [includeHard, setIncludeHard] = useState(true);
   const [userContext, setUserContext] = useState(() => loadUserContext());
   const [fadingId, setFadingId] = useState(null);
+  const [runId, setRunId] = useState(0);
   const hasComputedRef = useRef(false);
+  const resultRef = useRef(null);
 
   useEffect(() => { saveExcluded(excludedIds); }, [excludedIds]);
   useEffect(() => { saveUserContext(userContext); }, [userContext]);
@@ -142,7 +150,20 @@ export function RecommenderTab({ scores, state }) {
     setResult(r);
     setRelaxed(rx);
     setSkippedCount(sc);
+    setRunId(n => n + 1); // 触发滚动定位 + 结果区动画重播（自动重算不动 runId）
   };
+
+  // 点击「生成推荐」后平滑滚动到结果区（reduced-motion 下为瞬时）
+  useEffect(() => {
+    if (runId === 0) return;
+    const el = resultRef.current;
+    if (!el) return;
+    const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const id = requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [runId]);
 
   useEffect(() => {
     if (!hasComputedRef.current) return;
@@ -249,40 +270,46 @@ export function RecommenderTab({ scores, state }) {
       </Card>
 
       {/* ── 推荐结果（放在配置之后、"我的现状"之前） ── */}
-      {result && skippedCount > 0 && (
-        <div className="flex items-start gap-2 rounded-xl px-3 py-2 text-xs border bg-brand-50/60 dark:bg-brand-900/20 border-brand-100/70 dark:border-brand-800/40 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
-          <span aria-hidden className="shrink-0 mt-px font-bold text-brand-500 dark:text-brand-300">ⓘ</span>
-          <span>已根据你当前的填写，自动跳过 <span className="font-semibold text-slate-800 dark:text-slate-100">{skippedCount}</span> 个已完成 / 不再增分的项目。</span>
-        </div>
-      )}
-
-      {result && !result.feasible && (
-        <Card className="border-danger-300/70 dark:border-danger-700/50 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
-          <h3 className="text-sm font-semibold text-danger-700 dark:text-danger-300 mb-2">无法达成目标</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
-            当前候选项不足以达成目标。可以：① 取消已排除的项目；② 在「我的现状」中提高已声明的最高档位以扩大推荐范围；③ 或调低目标分。
-          </p>
-          {relaxed && (
-            <button onClick={() => setIncludeHard(true)}
-              className="w-full py-2 rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-xs font-medium hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors">
-              包含高难度项目后可达成，总时长 {relaxed.cost} 小时 · 一键包含
-            </button>
+      {result && (
+        <div ref={resultRef} className="space-y-4 scroll-mt-32 lg:scroll-mt-24">
+          {skippedCount > 0 && (
+            <div className="flex items-start gap-2 rounded-xl px-3 py-2 text-xs border bg-brand-50/60 dark:bg-brand-900/20 border-brand-100/70 dark:border-brand-800/40 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
+              <span aria-hidden className="shrink-0 mt-px font-bold text-brand-500 dark:text-brand-300">ⓘ</span>
+              <span>已根据你当前的填写，自动跳过 <span className="font-semibold text-slate-800 dark:text-slate-100">{skippedCount}</span> 个已完成 / 不再增分的项目。</span>
+            </div>
           )}
-        </Card>
-      )}
 
-      {result && result.feasible && result.selected.length === 0 && (
-        <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
-          <Badge color="success">已达标</Badge>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">当前总分已≥目标分，无需任何加分项。</p>
-        </Card>
-      )}
+          {!result.feasible && (
+            <Card className="border-danger-300/70 dark:border-danger-700/50 motion-safe:animate-[fadeInUp_0.25s_ease-out]">
+              <h3 className="text-sm font-semibold text-danger-700 dark:text-danger-300 mb-2">无法达成目标</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
+                当前候选项不足以达成目标。可以：① 取消已排除的项目；② 在「我的现状」中提高已声明的最高档位以扩大推荐范围；③ 或调低目标分。
+              </p>
+              {relaxed && (
+                <button onClick={() => setIncludeHard(true)}
+                  className="w-full py-2 rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-xs font-medium hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors">
+                  包含高难度项目后可达成，总时长 {relaxed.cost} 小时 · 一键包含
+                </button>
+              )}
+            </Card>
+          )}
 
-      {result && result.feasible && result.selected.length > 0 && (
-        <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
-          <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
-          <ResultBody result={result} onExclude={onExclude} fadingId={fadingId} />
-        </Card>
+          {result.feasible && result.selected.length === 0 && (
+            <Card className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
+              <Badge color="success">已达标</Badge>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">当前总分已≥目标分，无需任何加分项。</p>
+            </Card>
+          )}
+
+          {result.feasible && result.selected.length > 0 && (
+            <Card key={runId} className="result-pulse">
+              <div className="motion-safe:animate-[fadeInUp_0.25s_ease-out]">
+                <h3 className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 mb-3">推荐加分方案</h3>
+                <ResultBody result={result} onExclude={onExclude} fadingId={fadingId} />
+              </div>
+            </Card>
+          )}
+        </div>
       )}
 
       <Card>

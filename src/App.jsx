@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TabNav } from "./components/ui";
+import { TabNav, AnimatedNumber } from "./components/ui";
 import { IconSun, IconMoon, IconShare, IconShieldCheck, IconAward, IconStar, IconCalculator } from "./components/icons";
 import { ConductTab } from "./components/tabs/ConductTab";
 import { AbilityTab } from "./components/tabs/AbilityTab";
@@ -76,7 +76,7 @@ export default function App() {
                 <button type="button" onClick={() => setShowExport(true)} title="导出" aria-label="导出得分报告" className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400"><IconShare /></button>
                 <button type="button" onClick={() => setDark(!dark)} title={dark ? "浅色模式" : "深色模式"} aria-label={dark ? "切换到浅色模式" : "切换到深色模式"} className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400">{dark ? <IconSun /> : <IconMoon />}</button>
                 <div className="text-right ml-2" aria-live="polite">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums text-slate-900 dark:text-slate-50"><span className="sr-only">当前总分 </span>{scores.total.toFixed(1)}</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums text-slate-900 dark:text-slate-50"><span className="sr-only">当前总分 </span><AnimatedNumber value={scores.total} /></div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">/ 105</div>
                 </div>
               </div>

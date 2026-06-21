@@ -127,6 +127,27 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* 更明显的弹入（表单动态行用）：起点更小 + 轻微上移 + 末端轻微过冲 */
+@keyframes popInRow {
+  0%   { opacity: 0; transform: scale(0.85) translateY(8px); }
+  60%  { opacity: 1; transform: scale(1.03) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 推荐结果落地高亮脉冲（滚动定位后引导视线） */
+@keyframes resultPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(31, 78, 121, 0); }
+  25%  { box-shadow: 0 0 0 4px rgba(31, 78, 121, 0.28); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 78, 121, 0); }
+}
+@keyframes resultPulseDark {
+  0%   { box-shadow: 0 0 0 0 rgba(92, 135, 178, 0); }
+  25%  { box-shadow: 0 0 0 4px rgba(92, 135, 178, 0.34); }
+  100% { box-shadow: 0 0 0 0 rgba(92, 135, 178, 0); }
+}
+.result-pulse { animation: resultPulse 1.1s ease-out; }
+.dark .result-pulse { animation-name: resultPulseDark; }
+
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
