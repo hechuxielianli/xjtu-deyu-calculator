@@ -148,7 +148,6 @@ src/
 │   ├── CollapsibleList.jsx        # 可折叠列表
 │   ├── ExportModal.jsx            # 导出弹窗 + Canvas 绘制
 │   ├── ScoreSummary.jsx           # 得分汇总卡片
-│   ├── BackgroundDecoration.jsx   # 背景装饰层
 │   └── tabs/
 │       ├── ConductTab.jsx         # 品行素质
 │       ├── AbilityTab.jsx         # 能力拓展
