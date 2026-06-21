@@ -2,24 +2,18 @@ import { useState, useRef } from "react";
 import { IconCheck, IconPlus, IconX, IconChevronUp, IconChevronDown } from "./icons";
 import { cn } from "../utils/cn";
 
-export function Card({ children, className, hoverable = false, accent }) {
-  const accentBorder = {
-    brand:   "hover:border-brand-300/70   dark:hover:border-brand-500/40",
-    conduct: "hover:border-conduct-300/70 dark:hover:border-conduct-500/40",
-    ability: "hover:border-ability-300/70 dark:hover:border-ability-500/40",
-    reward:  "hover:border-reward-300/70  dark:hover:border-reward-500/40",
-  }[accent] || "hover:border-brand-300/70 dark:hover:border-brand-500/40";
+// ── 极简留白·纯净近单色原子库 ──
+// 墨/纸灰阶 + 单一交大蓝强调；扁平、发丝线、大留白、无玻璃/无重阴影。
+// 三模块色（conduct/ability/reward）在原子层统一塌缩为交大蓝；语义红仅留给负分（扣分）。
+// 各 Tab 表单体仍传 color="conduct" 等 —— 被此处塌缩，无需改动。
 
+export function Card({ children, className, hoverable = false }) {
   return (
     <div className={cn(
-      "relative rounded-2xl border p-4 sm:p-5 transition-all duration-300",
-      "border-white/70 dark:border-white/10",
-      "bg-white/85 dark:bg-slate-900/60",
-      "backdrop-blur-xl dark:backdrop-blur-2xl",
-      "shadow-glass-md",
-      "dark:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_8px_32px_-12px_rgba(0,0,0,0.6)]",
-      hoverable && "card-shine-on-hover hover:-translate-y-0.5 hover:shadow-glass-lg",
-      hoverable && accentBorder,
+      "relative rounded-2xl border p-5 sm:p-6 transition-colors duration-200",
+      "border-slate-200/80 dark:border-white/10",
+      "bg-white/60 dark:bg-white/[0.02]",
+      hoverable && "hover:border-brand-300 dark:hover:border-brand-500/50",
       className,
     )}>
       {children}
@@ -27,46 +21,30 @@ export function Card({ children, className, hoverable = false, accent }) {
   );
 }
 
-const BADGE_COLORS = {
-  brand:   "bg-brand-50/80   text-brand-700   border-brand-200/60   dark:bg-brand-900/30   dark:text-brand-300   dark:border-brand-700/50",
-  conduct: "bg-conduct-50/80 text-conduct-700 border-conduct-200/60 dark:bg-conduct-900/30 dark:text-conduct-300 dark:border-conduct-700/50",
-  ability: "bg-ability-50/80 text-ability-700 border-ability-200/60 dark:bg-ability-900/30 dark:text-ability-300 dark:border-ability-700/50",
-  reward:  "bg-reward-50/80  text-reward-700  border-reward-200/60  dark:bg-reward-900/30  dark:text-reward-300  dark:border-reward-700/50",
-  danger:  "bg-danger-50/80  text-danger-700  border-danger-200/60  dark:bg-danger-900/30  dark:text-danger-300  dark:border-danger-700/50",
-  success: "bg-success-50/80 text-success-700 border-success-200/60 dark:bg-success-900/30 dark:text-success-300 dark:border-success-700/50",
-  neutral: "bg-slate-100/80  text-slate-600   border-slate-200/60   dark:bg-slate-700/50   dark:text-slate-300   dark:border-slate-600/50",
+// 颜色塌缩：danger→语义红；neutral→墨；其余（brand/conduct/ability/reward/success）→交大蓝强调
+const badgeTone = (color) => (color === "danger" ? "danger" : color === "neutral" || color == null ? "neutral" : "accent");
+const BADGE_TONE = {
+  accent:  "border-brand-300/80  text-brand-700  dark:border-brand-600/60  dark:text-brand-300",
+  danger:  "border-danger-300/80 text-danger-700 dark:border-danger-700/60 dark:text-danger-300",
+  neutral: "border-slate-200     text-slate-600  dark:border-white/15       dark:text-slate-300",
 };
 
 export function Badge({ children, color = "neutral" }) {
-  return <span className={cn("inline-block rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap backdrop-blur-sm", BADGE_COLORS[color] || BADGE_COLORS.neutral)}>{children}</span>;
+  return <span className={cn("inline-block rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap", BADGE_TONE[badgeTone(color)])}>{children}</span>;
 }
 
-const BAR_COLORS = {
-  conduct: "bg-gradient-to-r from-conduct-400 to-conduct-600 dark:from-conduct-400 dark:to-conduct-500",
-  ability: "bg-gradient-to-r from-ability-400 to-ability-600 dark:from-ability-400 dark:to-ability-500",
-  reward:  "bg-gradient-to-r from-reward-300 to-reward-500  dark:from-reward-300 dark:to-reward-400",
-  brand:   "bg-gradient-to-r from-brand-400   to-brand-600   dark:from-brand-400   dark:to-brand-500",
-};
-
-const ICON_CHIP = {
-  conduct: "bg-conduct-100/70 text-conduct-700 dark:bg-conduct-900/40 dark:text-conduct-300",
-  ability: "bg-ability-100/70 text-ability-700 dark:bg-ability-900/40 dark:text-ability-300",
-  reward:  "bg-reward-100/70  text-reward-700  dark:bg-reward-900/40  dark:text-reward-300",
-  brand:   "bg-brand-100/70   text-brand-700   dark:bg-brand-900/40   dark:text-brand-300",
-};
-
-export function SectionTitle({ icon, title, subtitle, score, maxScore, color }) {
-  const chip = ICON_CHIP[color] || ICON_CHIP.brand;
+export function SectionTitle({ icon, title, subtitle, score, maxScore }) {
+  const pct = maxScore > 0 ? Math.min(100, (score / maxScore) * 100) : 0;
   return (
     <div className="mb-4">
       <div className="flex items-center gap-2.5 mb-1.5">
-        <span className={cn("inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0", chip)}>{icon}</span>
-        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">{title}</h2>
-        <span className="ml-auto font-mono text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">{score.toFixed(1)}<span className="text-slate-500 dark:text-slate-400">/{maxScore}</span></span>
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0 bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300">{icon}</span>
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-50">{title}</h2>
+        <span className="ml-auto font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">{score.toFixed(1)}<span className="text-slate-400 dark:text-slate-500">/{maxScore}</span></span>
       </div>
-      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 ml-[2.625rem]">{subtitle}</p>}
-      <div className="h-1.5 rounded-full bg-slate-200/70 dark:bg-slate-700/60 overflow-hidden">
-        <div className={cn("h-full rounded-full transition-all duration-500 ease-out", BAR_COLORS[color] || BAR_COLORS.brand)} style={{ width: `${Math.min(100, (score / maxScore) * 100)}%` }} />
+      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mb-2.5 ml-[2.625rem]">{subtitle}</p>}
+      <div className="relative h-px w-full bg-slate-200 dark:bg-white/10">
+        <div className="absolute left-0 top-0 h-px bg-brand-600 dark:bg-brand-400 transition-all duration-500 ease-out" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -74,22 +52,21 @@ export function SectionTitle({ icon, title, subtitle, score, maxScore, color }) 
 
 export function Field({ label, children, hint }) {
   return (
-    <div className="mb-3">
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{label}</label>
       {children}
-      {hint && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{hint}</p>}
     </div>
   );
 }
 
 const FIELD_CLASS = cn(
-  "w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200",
-  "border-slate-300/80 bg-white/85 text-slate-700",
-  "hover:border-slate-400 hover:bg-white",
-  "focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:bg-white",
-  "dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200",
-  "dark:hover:border-slate-500 dark:hover:bg-slate-800/90",
-  "dark:focus:border-brand-400 dark:focus:ring-brand-400/30 dark:focus:bg-slate-800",
+  "w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors duration-200",
+  "border-slate-300 bg-transparent text-slate-800",
+  "hover:border-slate-400",
+  "focus:border-brand-600 focus:ring-1 focus:ring-brand-600/30",
+  "dark:border-white/15 dark:text-slate-100",
+  "dark:hover:border-white/30 dark:focus:border-brand-400 dark:focus:ring-brand-400/30",
 );
 
 export function Select({ value, onChange, options, className }) {
@@ -103,16 +80,14 @@ export function Select({ value, onChange, options, className }) {
 export function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
   // draft 为 null 表示受控于外部 value；为 string 表示用户正在编辑（允许临时空/前导 0/中间态）
   const [draft, setDraft] = useState(null);
-  // 显示值：编辑中用 draft，否则跟随外部 value
   const display = draft !== null ? draft : String(value);
 
   const clamp = (n) => Math.max(min, Math.min(max, n));
 
   const handleChange = (e) => {
     const raw = e.target.value;
-    setDraft(raw); // 永远先保留用户键入的原始文本（含 "" 和 "010"）
-
-    if (raw === "" || raw === "-") return; // 中间态，不提交
+    setDraft(raw);
+    if (raw === "" || raw === "-") return;
     const num = Number(raw);
     if (Number.isNaN(num)) return;
     const clamped = clamp(num);
@@ -122,20 +97,15 @@ export function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
   const handleBlur = () => {
     if (draft === null) return;
     if (draft === "" || draft === "-" || Number.isNaN(Number(draft))) {
-      // 空白或非法 → 回落到 min
       if (value !== min) onChange(min);
     } else {
-      // 规范化（如 "010" → 10），同步给父
       const clamped = clamp(Number(draft));
       if (clamped !== value) onChange(clamped);
     }
-    setDraft(null); // 退出编辑模式，恢复受控显示
+    setDraft(null);
   };
 
-  const handleFocus = (e) => {
-    // 聚焦时选中全部内容，方便整体替换（解决 0 删不掉的体验问题）
-    e.target.select();
-  };
+  const handleFocus = (e) => { e.target.select(); };
 
   return (
     <input type="number" inputMode="decimal" value={display} min={min} max={max} step={step}
@@ -147,14 +117,14 @@ export function NumberInput({ value, onChange, min = 0, max = 99, step = 1 }) {
 export function Checkbox({ checked, onChange, label, disabled = false, ariaLabel }) {
   return (
     <label className={cn(
-      "flex items-start gap-2 group",
+      "flex items-start gap-2.5 group",
       disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
     )}>
       <div aria-hidden="true" className={cn(
-        "w-4 h-4 mt-0.5 shrink-0 rounded border-2 flex items-center justify-center transition-all",
-        checked && !disabled && "bg-brand-500 border-brand-500 shadow-[0_0_0_3px_rgba(31,78,121,0.18)]",
+        "w-4 h-4 mt-0.5 shrink-0 rounded-[5px] border flex items-center justify-center transition-colors",
+        checked && !disabled && "bg-brand-600 border-brand-600 dark:bg-brand-400 dark:border-brand-400",
         checked && disabled && "bg-slate-400 border-slate-400 dark:bg-slate-500 dark:border-slate-500",
-        !checked && "border-slate-300 bg-white/60 group-hover:border-brand-400 dark:border-slate-500 dark:bg-slate-700/40 dark:group-hover:border-brand-400",
+        !checked && "border-slate-300 group-hover:border-brand-500 dark:border-white/25 dark:group-hover:border-brand-400",
       )}>
         {checked && <IconCheck />}
       </div>
@@ -168,35 +138,31 @@ export function Checkbox({ checked, onChange, label, disabled = false, ariaLabel
 
 export function AddButton({ onClick, label }) {
   return (
-    <button onClick={onClick}
-      className="flex items-center gap-1.5 text-sm text-brand-600 dark:text-brand-300 font-medium py-1.5 px-3 rounded-lg border border-dashed border-brand-300/80 dark:border-brand-500/40 hover:bg-brand-50/70 dark:hover:bg-brand-900/30 hover:border-brand-400 dark:hover:border-brand-400 transition-all">
+    <button type="button" onClick={onClick}
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 dark:text-brand-300 py-1.5 px-3 rounded-lg border border-dashed border-slate-300 dark:border-white/15 hover:border-brand-500 hover:text-brand-800 dark:hover:border-brand-400 dark:hover:text-brand-200 transition-colors">
       <IconPlus />{label}
     </button>
   );
 }
 
-const SCORE_BADGE_COLORS = {
-  conduct: "text-conduct-700 bg-conduct-50/80 dark:text-conduct-200 dark:bg-conduct-900/40",
-  ability: "text-ability-700 bg-ability-50/80 dark:text-ability-200 dark:bg-ability-900/40",
-  reward:  "text-reward-700  bg-reward-50/80  dark:text-reward-200  dark:bg-reward-900/40",
-  danger:  "text-danger-700  bg-danger-50/80  dark:text-danger-200  dark:bg-danger-900/40",
-  brand:   "text-brand-700   bg-brand-50/80   dark:text-brand-200   dark:bg-brand-900/40",
-};
-
-export function DynamicItem({ children, onRemove, onMoveUp, onMoveDown, score, showReorder, scoreColor = "brand" }) {
-  const badgeColor = score !== undefined && score < 0 ? SCORE_BADGE_COLORS.danger : SCORE_BADGE_COLORS[scoreColor];
+export function DynamicItem({ children, onRemove, onMoveUp, onMoveDown, score, showReorder }) {
+  const neg = score !== undefined && score < 0;
   return (
-    <div className="flex items-start gap-2 p-3 rounded-xl mb-2 border border-white/60 dark:border-white/5 bg-white/50 dark:bg-slate-800/40 backdrop-blur-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60">
+    <div className="flex items-start gap-2 p-3 rounded-xl mb-2 border border-slate-200/80 dark:border-white/10 bg-transparent transition-colors hover:border-slate-300 dark:hover:border-white/20">
       <div className="flex-1 flex flex-wrap gap-2 items-end">{children}</div>
       <div className="flex items-center gap-1 pt-1 shrink-0">
-        {score !== undefined && <span className={cn("font-mono text-xs font-semibold px-1.5 py-0.5 rounded", badgeColor)}>{score >= 0 ? "+" : ""}{score}</span>}
+        {score !== undefined && (
+          <span className={cn("font-mono text-xs font-semibold px-1 tabular-nums", neg ? "text-danger-600 dark:text-danger-300" : "text-brand-700 dark:text-brand-300")}>
+            {score >= 0 ? "+" : ""}{score}
+          </span>
+        )}
         {showReorder && (
           <>
-            <button type="button" onClick={onMoveUp} disabled={!onMoveUp} aria-label="上移" className="text-slate-500 hover:text-brand-500 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronUp /></button>
-            <button type="button" onClick={onMoveDown} disabled={!onMoveDown} aria-label="下移" className="text-slate-500 hover:text-brand-500 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronDown /></button>
+            <button type="button" onClick={onMoveUp} disabled={!onMoveUp} aria-label="上移" className="text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronUp /></button>
+            <button type="button" onClick={onMoveDown} disabled={!onMoveDown} aria-label="下移" className="text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 p-0.5 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"><IconChevronDown /></button>
           </>
         )}
-        <button type="button" onClick={onRemove} aria-label="删除" className="text-slate-500 hover:text-danger-500 dark:text-slate-400 dark:hover:text-danger-400 p-1 rounded transition"><IconX /></button>
+        <button type="button" onClick={onRemove} aria-label="删除" className="text-slate-500 hover:text-danger-600 dark:text-slate-400 dark:hover:text-danger-400 p-1 rounded transition"><IconX /></button>
       </div>
     </div>
   );
@@ -226,18 +192,14 @@ export function TabNav({ active, onChange, tabs, className }) {
   return (
     <div role="tablist" aria-label="评分模块" aria-orientation="horizontal" onKeyDown={onKeyDown}
       className={cn(
-      "relative flex gap-1 rounded-2xl p-1 mb-5",
-      "bg-white/60 dark:bg-slate-800/50",
-      "backdrop-blur-xl",
-      "border border-white/60 dark:border-white/10",
-      "shadow-[0_1px_2px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.6)]",
-      "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
-      className,
-    )}>
-      {/* 滑动 indicator（纯装饰） */}
+        "relative flex gap-1 rounded-2xl p-1 mb-5 border",
+        "bg-slate-100 dark:bg-slate-800/60 border-slate-200/80 dark:border-white/10",
+        className,
+      )}>
+      {/* 滑动 indicator（扁平·纯净） */}
       <div
         aria-hidden="true"
-        className="absolute top-1 bottom-1 rounded-xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-700 dark:to-slate-700/80 shadow-md shadow-brand-500/10 dark:shadow-brand-500/20 transition-all duration-300 ease-out pointer-events-none"
+        className="absolute top-1 bottom-1 rounded-xl bg-white dark:bg-slate-700 shadow-sm transition-all duration-300 ease-out pointer-events-none"
         style={{
           width: `calc(${widthPct}% - 0.5rem)`,
           left: `calc(${activeIdx * widthPct}% + 0.25rem)`,

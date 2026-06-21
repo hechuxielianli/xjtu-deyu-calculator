@@ -14,12 +14,12 @@ const EXPORT_COLORS = {
     track:   "#e2e8f0",  // 进度条底色
     dots:    "#cbd5e1",  // slate-300
     subBg:   "#f8fafc",
-    conduct: "#2e6fb7",  // 靖蓝 conduct-600
-    ability: "#2f8f9d",  // 青 teal ability-600
-    reward:  "#c99a2e",  // 暖金 reward-500
-    danger:  "#c0504d",  // 暗红 danger-500
+    conduct: "#1f4e79",  // 近单色：三模块统一交大蓝 brand-600
+    ability: "#1f4e79",
+    reward:  "#1f4e79",
+    danger:  "#c0504d",  // 暗红 danger-500（语义：负分/水印）
     brand:   "#1f4e79",  // 交大蓝 brand-600
-    accent:  "#c99a2e",  // 暖金 accent-500
+    accent:  "#1f4e79",  // 近单色：accent 同归交大蓝（总分纯色）
   },
   dark: {
     bg:      "#020617",  // slate-950
@@ -31,12 +31,12 @@ const EXPORT_COLORS = {
     track:   "#334155",
     dots:    "#475569",  // slate-600
     subBg:   "#0f172a",
-    conduct: "#88aed6",  // 靖蓝 conduct-300
-    ability: "#66bfc8",  // 青 teal ability-300
-    reward:  "#e0c074",  // 暖金 reward-300
-    danger:  "#e29b98",  // 暗红 danger-300
+    conduct: "#8fb0ce",  // 近单色：三模块统一交大蓝 brand-300
+    ability: "#8fb0ce",
+    reward:  "#8fb0ce",
+    danger:  "#e29b98",  // 暗红 danger-300（语义：负分/水印）
     brand:   "#8fb0ce",  // 交大蓝 brand-300
-    accent:  "#e0c074",  // 暖金 accent-300
+    accent:  "#8fb0ce",  // 近单色：accent 同归交大蓝
   },
 };
 
@@ -65,13 +65,11 @@ function drawExportImage(scores, isDark, logoImg) {
   // 渐变背景
   const bgGrad = ctx.createLinearGradient(0, 0, W, H);
   if (isDark) {
-    bgGrad.addColorStop(0, "#020617");   // slate-950
-    bgGrad.addColorStop(0.5, "#122f49"); // 交大蓝 brand-800
+    bgGrad.addColorStop(0, "#020617");   // slate-950（纯纸面）
     bgGrad.addColorStop(1, "#020617");
   } else {
-    bgGrad.addColorStop(0, "#f8fafc");   // slate-50
-    bgGrad.addColorStop(0.5, "#eff4f9"); // 交大蓝 brand-50
-    bgGrad.addColorStop(1, "#fbf5e8");   // 暖金 accent-50（蓝→金呼应）
+    bgGrad.addColorStop(0, "#f8fafc");   // slate-50（纯纸面）
+    bgGrad.addColorStop(1, "#f8fafc");
   }
   ctx.fillStyle = bgGrad; roundRect(ctx, 0, 0, W, H, 16, true);
 
@@ -246,11 +244,11 @@ export function ExportModal({ scores, isDark, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
       <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="export-modal-title"
-        className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 max-h-[90vh] flex flex-col outline-none motion-safe:animate-[fadeInUp_0.24s_ease-out]"
+        className="w-full sm:max-w-xl lg:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 max-h-[90vh] flex flex-col outline-none motion-safe:animate-[fadeInUp_0.24s_ease-out]"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/60 dark:border-white/10 shrink-0">
           <h3 id="export-modal-title" className="text-[15px] font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span className="inline-flex w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white items-center justify-center"><IconArrowUpRight className="w-3.5 h-3.5" /></span>
+            <span className="inline-flex w-6 h-6 rounded-lg bg-brand-600 text-white dark:bg-brand-400 dark:text-slate-950 items-center justify-center"><IconArrowUpRight className="w-3.5 h-3.5" /></span>
             导出得分
           </h3>
           <button type="button" onClick={onClose} aria-label="关闭" className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition"><IconX /></button>
@@ -259,11 +257,11 @@ export function ExportModal({ scores, isDark, onClose }) {
           <div ref={previewRef} className="mb-4 rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/10 shadow-sm" />
           <div className="flex gap-3">
             <button onClick={saveImage}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-700 hover:to-accent-700 text-white shadow-md shadow-brand-500/25 hover:shadow-lg hover:shadow-brand-500/30 active:scale-[0.98]">
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors bg-brand-700 text-white hover:bg-brand-800 dark:bg-brand-400 dark:text-slate-950 dark:hover:bg-brand-300 active:scale-[0.98]">
               <IconCamera />保存图片
             </button>
             <button onClick={printPDF}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition border border-slate-200/80 dark:border-white/10 bg-white/60 dark:bg-slate-800/40 backdrop-blur-sm text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 active:scale-[0.98]">
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors border border-slate-300 dark:border-white/15 bg-transparent text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-white/30 active:scale-[0.98]">
               <IconPrinter />打印 / PDF
             </button>
           </div>

@@ -7,7 +7,6 @@ import { RewardTab } from "./components/tabs/RewardTab";
 import { RecommenderTab } from "./components/tabs/RecommenderTab";
 import { ScoreSummary } from "./components/ScoreSummary";
 import { ExportModal } from "./components/ExportModal";
-import { BackgroundDecoration } from "./components/BackgroundDecoration";
 import { useScoreCalculator } from "./hooks/useScoreCalculator";
 import { loadState, usePersistState, loadTheme, saveTheme } from "./hooks/useLocalStorage";
 
@@ -56,19 +55,17 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Noto Sans SC','PingFang SC',-apple-system,sans-serif" }}
-      className="min-h-screen relative transition-colors bg-gradient-to-br from-slate-50 via-brand-50/40 to-slate-100 dark:from-slate-950 dark:via-brand-950/30 dark:to-slate-900">
-
-        <BackgroundDecoration dark={dark} />
+      className="min-h-screen relative transition-colors bg-slate-50 dark:bg-slate-950">
 
         {/* ── HEADER ── */}
-        <header className="sticky top-0 z-50 border-b backdrop-blur-xl transition-colors bg-white/70 border-white/60 dark:bg-slate-950/60 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)]">
+        <header className="sticky top-0 z-50 border-b transition-colors bg-slate-50/90 backdrop-blur-sm border-slate-200 dark:bg-slate-950/90 dark:border-white/10">
           <div className="max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3">
             <div className="flex items-center justify-between gap-2 mb-2 lg:mb-0">
               <div className="min-w-0 flex items-center gap-3">
                 <img
                   src="/xjtublue.png"
                   alt="西安交通大学校徽"
-                  className="hidden sm:block w-9 h-9 rounded-xl object-contain shadow-lg shadow-brand-500/20 bg-white/70 dark:bg-white/90 p-1 ring-1 ring-white/60 dark:ring-white/20"
+                  className="hidden sm:block w-9 h-9 rounded-xl object-contain bg-white p-1 ring-1 ring-slate-200 dark:ring-white/15"
                 />
                 <div className="min-w-0">
                   <h1 className="text-base sm:text-lg lg:text-xl font-bold tracking-tight truncate text-slate-800 dark:text-slate-100">西安交通大学 · 综合素质测评计算器</h1>
@@ -79,22 +76,20 @@ export default function App() {
                 <button type="button" onClick={() => setShowExport(true)} title="导出" aria-label="导出得分报告" className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400"><IconShare /></button>
                 <button type="button" onClick={() => setDark(!dark)} title={dark ? "浅色模式" : "深色模式"} aria-label={dark ? "切换到浅色模式" : "切换到深色模式"} className="p-2 rounded-lg transition-all hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-300 text-slate-500 dark:text-slate-400">{dark ? <IconSun /> : <IconMoon />}</button>
                 <div className="text-right ml-2" aria-live="polite">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums bg-gradient-to-br from-brand-600 to-accent-600 dark:from-brand-300 dark:to-accent-300 bg-clip-text text-transparent"><span className="sr-only">当前总分 </span>{scores.total.toFixed(1)}</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono tabular-nums text-slate-900 dark:text-slate-50"><span className="sr-only">当前总分 </span>{scores.total.toFixed(1)}</div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">/ 105</div>
                 </div>
               </div>
             </div>
             {/* 小屏展示三色进度条 + 模块标签；大屏由右栏 ScoreSummary 承担 */}
             <div className="lg:hidden">
-              <div className="flex gap-0.5 h-2 rounded-full overflow-hidden bg-slate-200/60 dark:bg-slate-700/60">
-                <div className="bg-gradient-to-r from-conduct-400 to-conduct-600 rounded-l-full transition-all duration-500 ease-out" style={{ width: `${(scores.conduct.total / 105) * 100}%` }} />
-                <div className="bg-gradient-to-r from-ability-400 to-ability-600 transition-all duration-500 ease-out" style={{ width: `${(scores.ability.total / 105) * 100}%` }} />
-                <div className="bg-gradient-to-r from-reward-300 to-reward-500 rounded-r-full transition-all duration-500 ease-out" style={{ width: `${(scores.reward.total / 105) * 100}%` }} />
+              <div className="h-1.5 rounded-full overflow-hidden bg-slate-200 dark:bg-white/10">
+                <div className="h-full rounded-full bg-brand-600 dark:bg-brand-400 transition-all duration-500 ease-out" style={{ width: `${(scores.total / 105) * 100}%` }} />
               </div>
-              <div className="flex justify-between mt-1 text-xs text-slate-500 dark:text-slate-400">
-                <span><span className="inline-block w-2 h-2 rounded-full bg-conduct-500 mr-1 align-middle" />品行 {scores.conduct.total.toFixed(1)}</span>
-                <span><span className="inline-block w-2 h-2 rounded-full bg-ability-500 mr-1 align-middle" />能力 {scores.ability.total.toFixed(1)}</span>
-                <span><span className="inline-block w-2 h-2 rounded-full bg-reward-400 mr-1 align-middle" />奖励 {scores.reward.total.toFixed(1)}</span>
+              <div className="flex justify-between mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 mr-1 align-middle" />品行 {scores.conduct.total.toFixed(1)}</span>
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 mr-1 align-middle" />能力 {scores.ability.total.toFixed(1)}</span>
+                <span><span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 mr-1 align-middle" />奖励 {scores.reward.total.toFixed(1)}</span>
               </div>
             </div>
           </div>

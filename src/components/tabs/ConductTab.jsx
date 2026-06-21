@@ -58,7 +58,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
                 </div>
                 <div className="text-xs px-3 py-2 rounded-lg text-slate-500 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/50">
                   {collectiveCount} × {collectivePerActivity} = {(collectiveCount * collectivePerActivity).toFixed(1)}
-                  {collectiveCount * collectivePerActivity > 3 && <span className="text-reward-600 dark:text-reward-300 font-medium ml-2">→ 封顶 3.0</span>}
+                  {collectiveCount * collectivePerActivity > 3 && <span className="text-brand-700 dark:text-brand-300 font-medium ml-2">→ 封顶 3.0</span>}
                 </div>
               </div>
             ) : (
@@ -83,7 +83,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
             label="获得优秀学员 (额外+1，需先参加培训)" />
         </div>
         {politicalStudy.outstanding && !(politicalStudy.basic || politicalStudy.provincial) && (
-          <p className="mt-2 text-xs text-reward-600 dark:text-reward-300">
+          <p className="mt-2 text-xs text-brand-700 dark:text-brand-300">
             "优秀学员"需先参加至少一项培训才能计入分数。
           </p>
         )}
@@ -115,7 +115,7 @@ export function ConductTab({ scores, basePass, setBasePass, collectiveMode, setC
                 onChange={v => setSocialService(p => ({ ...p, advancedIndividual: v }))}
                 label="获先进个人及表彰 (额外+1，需先参加服务)" />
               {socialService.advancedIndividual && !hasAnyService && (
-                <p className="mt-2 text-xs text-reward-600 dark:text-reward-300">
+                <p className="mt-2 text-xs text-brand-700 dark:text-brand-300">
                   "先进个人"需先参加任一社会服务项目才能计入分数。
                 </p>
               )}

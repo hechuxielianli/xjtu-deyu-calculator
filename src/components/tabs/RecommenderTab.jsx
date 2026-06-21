@@ -60,11 +60,11 @@ function ResultBody({ result, onExclude, fadingId }) {
         </div>
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">实际增量</div>
-          <div className="font-mono text-sm font-semibold text-success-600 dark:text-success-400">+{result.achievable.toFixed(1)}</div>
+          <div className="font-mono text-sm font-semibold text-brand-700 dark:text-brand-300">+{result.achievable.toFixed(1)}</div>
         </div>
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">总时长</div>
-          <div className="font-mono text-sm font-semibold text-ability-600 dark:text-ability-300">{result.cost} 小时</div>
+          <div className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-200">{result.cost} 小时</div>
         </div>
       </div>
       <div className="space-y-2">
@@ -84,15 +84,15 @@ function ResultBody({ result, onExclude, fadingId }) {
                     key={c.id}
                     className={cn(
                       "flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-all duration-200",
-                      "bg-white/50 dark:bg-slate-800/40 backdrop-blur-sm border border-white/40 dark:border-white/5",
+                      "bg-transparent border border-slate-200/80 dark:border-white/10",
                       fading ? "opacity-30 line-through" : "opacity-100",
                     )}
                   >
                     <span className="text-slate-700 dark:text-slate-200 flex-1 truncate">{c.label}</span>
                     <span className="shrink-0 font-mono text-xs">
-                      <span className="text-success-600 dark:text-success-400">+{c.value}</span>
+                      <span className="text-brand-700 dark:text-brand-300">+{c.value}</span>
                       <span className="text-slate-500 dark:text-slate-400 mx-1">/</span>
-                      <span className="text-ability-600 dark:text-ability-300">{formatCost(c.cost)}</span>
+                      <span className="text-slate-700 dark:text-slate-200">{formatCost(c.cost)}</span>
                     </span>
                     <button
                       onClick={() => onExclude(c.id)}
@@ -207,7 +207,7 @@ export function RecommenderTab({ scores, state }) {
           </div>
         </div>
         <button onClick={compute} disabled={gap <= 0}
-          className="w-full py-2.5 rounded-xl text-white text-sm font-medium transition-all bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 hover:from-brand-700 hover:via-brand-600 hover:to-accent-600 shadow-md shadow-brand-500/25 hover:shadow-lg hover:shadow-brand-500/30 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 disabled:bg-none disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:shadow-none disabled:hover:translate-y-0 disabled:cursor-not-allowed">
+          className="w-full py-2.5 rounded-xl text-sm font-medium transition-colors bg-brand-700 text-white hover:bg-brand-800 dark:bg-brand-400 dark:text-slate-950 dark:hover:bg-brand-300 active:scale-[0.98] disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 disabled:cursor-not-allowed">
           {gap <= 0 ? "目标已达成" : "生成推荐"}
         </button>
 
@@ -223,7 +223,7 @@ export function RecommenderTab({ scores, state }) {
               {excludedArray.map(id => (
                 <button key={id} type="button" onClick={() => onRestore(id)}
                   title="点击恢复" aria-label={`恢复 ${labelById[id] || id}`}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-slate-100/80 dark:bg-slate-700/50 backdrop-blur-sm text-slate-600 dark:text-slate-300 hover:bg-danger-50 hover:text-danger-600 dark:hover:bg-danger-900/30 dark:hover:text-danger-300 transition">
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-danger-50 hover:text-danger-600 dark:hover:bg-danger-900/30 dark:hover:text-danger-300 transition">
                   <span className="truncate max-w-[10rem]">{labelById[id] || id}</span>
                   <span aria-hidden>×</span>
                 </button>
@@ -264,7 +264,7 @@ export function RecommenderTab({ scores, state }) {
           </p>
           {relaxed && (
             <button onClick={() => setIncludeHard(true)}
-              className="w-full py-2 rounded-lg bg-brand-100/80 dark:bg-brand-900/30 backdrop-blur-sm text-brand-700 dark:text-brand-300 text-xs font-medium hover:bg-brand-200/80 dark:hover:bg-brand-900/50 transition">
+              className="w-full py-2 rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-xs font-medium hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors">
               包含高难度项目后可达成，总时长 {relaxed.cost} 小时 · 一键包含
             </button>
           )}
@@ -324,7 +324,7 @@ export function RecommenderTab({ scores, state }) {
         <summary className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 select-none py-1 inline-flex items-center gap-1 transition-colors duration-200">
           ▸<span className="group-open:hidden">了解推荐原理</span><span className="hidden group-open:inline">推荐原理</span>
         </summary>
-        <div className="mt-3 p-3 space-y-3 text-xs rounded-xl border bg-white/50 dark:bg-slate-900/40 backdrop-blur-sm border-white/50 dark:border-white/5 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.2s_ease-out]">
+        <div className="mt-3 p-3 space-y-3 text-xs rounded-xl border bg-slate-50 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 motion-safe:animate-[fadeInUp_0.2s_ease-out]">
           <div>
             <p className="font-semibold mb-1 text-slate-700 dark:text-slate-200">① 优化目标</p>
             <p>
