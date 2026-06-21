@@ -14,12 +14,12 @@ const EXPORT_COLORS = {
     track:   "#e2e8f0",  // 进度条底色
     dots:    "#cbd5e1",  // slate-300
     subBg:   "#f8fafc",
-    conduct: "#1f4e79",  // 近单色：三模块统一交大蓝 brand-600
-    ability: "#1f4e79",
-    reward:  "#1f4e79",
-    danger:  "#c0504d",  // 暗红 danger-500（语义：负分/水印）
+    conduct: "#2e6fb7",  // 靖蓝 conduct-600
+    ability: "#2f8f9d",  // 青 teal ability-600
+    reward:  "#c99a2e",  // 暖金 reward-500
+    danger:  "#c0504d",  // 暗红 danger-500（语义：负分）
     brand:   "#1f4e79",  // 交大蓝 brand-600
-    accent:  "#1f4e79",  // 近单色：accent 同归交大蓝（总分纯色）
+    accent:  "#c99a2e",  // 暖金 accent-500（总分蓝→金渐变）
   },
   dark: {
     bg:      "#020617",  // slate-950
@@ -31,12 +31,12 @@ const EXPORT_COLORS = {
     track:   "#334155",
     dots:    "#475569",  // slate-600
     subBg:   "#0f172a",
-    conduct: "#8fb0ce",  // 近单色：三模块统一交大蓝 brand-300
-    ability: "#8fb0ce",
-    reward:  "#8fb0ce",
-    danger:  "#e29b98",  // 暗红 danger-300（语义：负分/水印）
+    conduct: "#88aed6",  // 靖蓝 conduct-300
+    ability: "#66bfc8",  // 青 teal ability-300
+    reward:  "#e0c074",  // 暖金 reward-300
+    danger:  "#e29b98",  // 暗红 danger-300（语义：负分）
     brand:   "#8fb0ce",  // 交大蓝 brand-300
-    accent:  "#8fb0ce",  // 近单色：accent 同归交大蓝
+    accent:  "#e0c074",  // 暖金 accent-300（总分蓝→金渐变）
   },
 };
 
@@ -51,8 +51,26 @@ function roundRect(ctx, x, y, w, h, r, fill, stroke) {
   if (stroke) ctx.stroke();
 }
 
+// 画一段圆弧（环形仪表的彩色分段，圆角端点）
+function arcSegment(ctx, cx, cy, r, startA, endA, width, color) {
+  if (endA <= startA) return;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startA, endA);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.stroke();
+}
+
+// 十六进制 → rgba（带透明度），用于模块卡片的淡色底/边
+function hexA(hex, a) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 function drawExportImage(scores, isDark, logoImg) {
-  const W = 900, H = 600, dpr = window.devicePixelRatio || 2;
+  const W = 920, H = 640, dpr = window.devicePixelRatio || 2;
   const canvas = document.createElement("canvas");
   canvas.width = W * dpr; canvas.height = H * dpr;
   const ctx = canvas.getContext("2d");
@@ -61,114 +79,169 @@ function drawExportImage(scores, isDark, logoImg) {
   const c = isDark ? EXPORT_COLORS.dark : EXPORT_COLORS.light;
   const font = "'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif";
   const mono = "'SF Mono','Menlo','Consolas',monospace";
+  const TAU = Math.PI * 2;
 
-  // 渐变背景
-  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-  if (isDark) {
-    bgGrad.addColorStop(0, "#020617");   // slate-950（纯纸面）
-    bgGrad.addColorStop(1, "#020617");
-  } else {
-    bgGrad.addColorStop(0, "#f8fafc");   // slate-50（纯纸面）
-    bgGrad.addColorStop(1, "#f8fafc");
-  }
-  ctx.fillStyle = bgGrad; roundRect(ctx, 0, 0, W, H, 16, true);
+  // 纯纸面背景
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = c.cardBg; ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
-  roundRect(ctx, 24, 24, W - 48, H - 48, 12, true, true);
+  // 卡片：柔和投影 + 描边 + 顶部交大蓝压条（证书质感）
+  ctx.save();
+  ctx.shadowColor = isDark ? "rgba(0,0,0,0.55)" : "rgba(15,23,42,0.12)";
+  ctx.shadowBlur = 26; ctx.shadowOffsetY = 10;
+  ctx.fillStyle = c.cardBg;
+  roundRect(ctx, 24, 24, W - 48, H - 48, 18, true);
+  ctx.restore();
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  roundRect(ctx, 24, 24, W - 48, H - 48, 18, false, true);
+  ctx.save();
+  roundRect(ctx, 24, 24, W - 48, H - 48, 18, false, false);
+  ctx.clip();
+  const topBar = ctx.createLinearGradient(24, 0, W - 24, 0);
+  topBar.addColorStop(0, c.brand); topBar.addColorStop(1, c.accent);
+  ctx.fillStyle = topBar; ctx.fillRect(24, 24, W - 48, 4);
+  ctx.restore();
 
   const L = 56, R = W - 56;
-  let y = 56;
 
-  // Logo
-  const titleOffsetX = logoImg ? 44 : 0;
-  if (logoImg) {
-    try { ctx.drawImage(logoImg, L, y - 12, 36, 36); } catch { /* ignore */ }
+  // ── 页眉 ──
+  if (logoImg) { try { ctx.drawImage(logoImg, L, 40, 44, 44); } catch { /* ignore */ } }
+  const tx = logoImg ? L + 58 : L;
+  ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+  ctx.fillStyle = c.tp; ctx.font = `bold 20px ${font}`;
+  ctx.fillText("西安交通大学 · 综合素质测评得分", tx, 60);
+  ctx.fillStyle = c.tm; ctx.font = `12px ${font}`;
+  ctx.fillText("依据《本科生专业选择综合素质测评内容及评分标准》", tx, 82);
+  const hd = new Date();
+  const dateStr = `${hd.getFullYear()}-${String(hd.getMonth() + 1).padStart(2, "0")}-${String(hd.getDate()).padStart(2, "0")}`;
+  ctx.fillStyle = c.tm; ctx.font = `12px ${font}`; ctx.textAlign = "right";
+  ctx.fillText(dateStr, R, 60);
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, 104); ctx.lineTo(R, 104); ctx.stroke();
+
+  // ── 左·环形仪表（三段彩环 + 环心大号总分）──
+  const cx = 204, cy = 292, rr = 124, rw = 22;
+  ctx.beginPath(); ctx.arc(cx, cy, rr, 0, TAU);
+  ctx.strokeStyle = c.track; ctx.lineWidth = rw; ctx.lineCap = "butt"; ctx.stroke();
+  const segs = [
+    { v: scores.conduct.total, color: c.conduct },
+    { v: scores.ability.total, color: c.ability },
+    { v: scores.reward.total, color: c.reward },
+  ];
+  let a0 = -Math.PI / 2;
+  segs.forEach((s) => {
+    const frac = Math.max(0, s.v) / 105;
+    if (frac <= 0.0008) return;
+    const a1 = a0 + frac * TAU;
+    arcSegment(ctx, cx, cy, rr, a0, a1, rw, s.color);
+    a0 = a1;
+  });
+  ctx.textAlign = "center";
+  ctx.fillStyle = c.tm; ctx.font = `14px ${font}`;
+  ctx.fillText("总分", cx, cy - 38);
+  const totalGrad = ctx.createLinearGradient(cx - 72, cy, cx + 72, cy);
+  totalGrad.addColorStop(0, c.brand); totalGrad.addColorStop(1, c.accent);
+  ctx.fillStyle = totalGrad; ctx.font = `bold 60px ${mono}`;
+  ctx.fillText(scores.total.toFixed(1), cx, cy + 18);
+  ctx.fillStyle = c.tm; ctx.font = `15px ${font}`;
+  ctx.fillText("/ 105", cx, cy + 44);
+
+  // 图例（环下，横排居中）
+  const legend = [
+    { label: "品行", v: scores.conduct.total, color: c.conduct },
+    { label: "能力", v: scores.ability.total, color: c.ability },
+    { label: "奖励", v: scores.reward.total, color: c.reward },
+  ];
+  ctx.font = `12px ${font}`;
+  const lgGap = 18;
+  const lgW = legend.map((e) => 14 + ctx.measureText(`${e.label} ${e.v.toFixed(1)}`).width);
+  let lx = cx - (lgW.reduce((s, w) => s + w, 0) + lgGap * (legend.length - 1)) / 2;
+  legend.forEach((e, i) => {
+    ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(lx + 4, 456, 4, 0, TAU); ctx.fill();
+    ctx.fillStyle = c.ts; ctx.textAlign = "left"; ctx.fillText(`${e.label} ${e.v.toFixed(1)}`, lx + 14, 460);
+    lx += lgW[i] + lgGap;
+  });
+
+  // 总分进度条 + 距满分（填充左下、补充信息）
+  const remain = Math.max(0, 105 - scores.total);
+  const pbX = 86, pbW = 236, pbY = 506;
+  ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `12px ${font}`;
+  ctx.fillText("距满分", pbX, pbY - 8);
+  ctx.textAlign = "right"; ctx.fillStyle = c.tp; ctx.font = `bold 13px ${mono}`;
+  ctx.fillText(`${remain.toFixed(1)} 分`, pbX + pbW, pbY - 8);
+  ctx.fillStyle = c.track; roundRect(ctx, pbX, pbY, pbW, 8, 4, true);
+  const tpw = Math.min(1, scores.total / 105) * pbW;
+  if (tpw > 1) {
+    const pg = ctx.createLinearGradient(pbX, 0, pbX + pbW, 0);
+    pg.addColorStop(0, c.brand); pg.addColorStop(1, c.accent);
+    ctx.fillStyle = pg; roundRect(ctx, pbX, pbY, Math.max(tpw, 8), 8, 4, true);
   }
 
-  ctx.fillStyle = c.tp; ctx.font = `bold 18px ${font}`; ctx.textAlign = "left";
-  ctx.fillText("西安交通大学 · 综合素质测评得分", L + titleOffsetX, y);
-  y += 16; ctx.fillStyle = c.tm; ctx.font = `12px ${font}`;
-  ctx.fillText("依据《本科生专业选择综合素质测评内容及评分标准》", L + titleOffsetX, y);
+  // 竖向分隔线
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(356, 116); ctx.lineTo(356, H - 64); ctx.stroke();
 
-  // 总分 — 用 brand→accent 渐变文字
-  const totalGrad = ctx.createLinearGradient(R - 120, 50, R, 90);
-  totalGrad.addColorStop(0, c.brand);
-  totalGrad.addColorStop(1, c.accent);
-  ctx.fillStyle = totalGrad; ctx.font = `bold 48px ${mono}`; ctx.textAlign = "right";
-  ctx.fillText(scores.total.toFixed(1), R, 82);
-  ctx.fillStyle = c.tm; ctx.font = `14px ${font}`; ctx.fillText("/ 105", R, 100);
-
-  y = 120; ctx.strokeStyle = c.bd; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
-
-  y = 140; const barW = R - L;
-  ctx.fillStyle = c.track; roundRect(ctx, L, y, barW, 10, 5, true);
-  const p1 = (scores.conduct.total / 105) * barW, p2 = (scores.ability.total / 105) * barW, p3 = (scores.reward.total / 105) * barW;
-  ctx.fillStyle = c.conduct; roundRect(ctx, L, y, p1, 10, 5, true);
-  ctx.fillStyle = c.ability; ctx.fillRect(L + p1, y, p2, 10);
-  ctx.fillStyle = c.reward;  roundRect(ctx, L + p1 + p2, y, p3, 10, 5, true);
-
-  y = 176; const colW = (barW - 32) / 3;
-  const blocks = [
-    { label: "品行素质分", score: scores.conduct.total, max: 80, color: c.conduct, items: [
+  // ── 右·模块明细（三模块色淡底卡片 + 迷你进度条）──
+  const modules = [
+    { name: "品行素质", color: c.conduct, score: scores.conduct.total, max: 80, items: [
       ["基准分", scores.conduct.base], ["集体活动", scores.conduct.collective], ["思政学习", scores.conduct.political],
       ["社会服务", scores.conduct.social], ...(scores.conduct.penalty > 0 ? [["扣分", -scores.conduct.penalty]] : [])] },
-    { label: "能力拓展分", score: scores.ability.total, max: 20, color: c.ability, items: [
+    { name: "能力拓展", color: c.ability, score: scores.ability.total, max: 20, items: [
       ["学术科研", scores.ability.academic], ["文体竞赛", scores.ability.artSport], ["组织任职", scores.ability.org]] },
-    { label: "奖励分", score: scores.reward.total, max: 5, color: c.reward, items: [
+    { name: "奖励分", color: c.reward, score: scores.reward.total, max: 5, items: [
       ["荣誉表彰", scores.reward.honor], ["好人好事", scores.reward.deeds]] },
   ];
-
-  blocks.forEach((b, i) => {
-    const bx = L + i * (colW + 16);
-    ctx.fillStyle = c.subBg; ctx.strokeStyle = c.bd; ctx.lineWidth = 0.5;
-    roundRect(ctx, bx, y, colW, 340, 10, true, true);
-    // Color indicator bar at top
-    ctx.fillStyle = b.color;
-    roundRect(ctx, bx, y, colW, 4, 10, true);
-    ctx.fillStyle = b.color; ctx.font = `bold 13px ${font}`; ctx.textAlign = "left";
-    ctx.fillText(b.label, bx + 16, y + 28);
-    ctx.fillStyle = c.tp; ctx.font = `bold 28px ${mono}`; ctx.textAlign = "right";
-    ctx.fillText(b.score.toFixed(1), bx + colW - 16, y + 30);
-    ctx.fillStyle = c.tm; ctx.font = `12px ${font}`; ctx.fillText(`/${b.max}`, bx + colW - 16, y + 48);
-    let iy = y + 72;
-    b.items.forEach(([name, val]) => {
-      ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `13px ${font}`; ctx.fillText(name, bx + 16, iy);
+  const cardX = 376, cardIW = R - cardX, pad = 16;
+  let cardY = 118;
+  modules.forEach((m) => {
+    const ih = m.items.length;
+    const cardH = 64 + ih * 21;
+    const ix = cardX + pad, iw = cardIW - pad * 2, ixr = cardX + cardIW - pad;
+    // 淡色底 + 同色描边
+    ctx.fillStyle = hexA(m.color, isDark ? 0.13 : 0.06);
+    roundRect(ctx, cardX, cardY, cardIW, cardH, 12, true);
+    ctx.strokeStyle = hexA(m.color, isDark ? 0.34 : 0.22); ctx.lineWidth = 1;
+    roundRect(ctx, cardX, cardY, cardIW, cardH, 12, false, true);
+    // 头部：色点 + 模块名（着模块色）+ 得分 / 上限
+    const hy = cardY + 30;
+    ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(ix + 5, hy - 4, 5, 0, TAU); ctx.fill();
+    ctx.fillStyle = m.color; ctx.font = `bold 15px ${font}`; ctx.textAlign = "left";
+    ctx.fillText(m.name, ix + 18, hy);
+    ctx.font = `12px ${mono}`; ctx.fillStyle = c.tm; ctx.textAlign = "right";
+    const maxText = `/${m.max}`, maxW = ctx.measureText(maxText).width;
+    ctx.fillText(maxText, ixr, hy);
+    ctx.font = `bold 19px ${mono}`; ctx.fillStyle = c.tp;
+    ctx.fillText(m.score.toFixed(1), ixr - maxW - 3, hy);
+    // 迷你进度条（轨道为模块色淡底）
+    const by = cardY + 44;
+    ctx.fillStyle = hexA(m.color, isDark ? 0.22 : 0.16); roundRect(ctx, ix, by, iw, 6, 3, true);
+    const pw = Math.min(1, m.max > 0 ? m.score / m.max : 0) * iw;
+    if (pw > 0.5) { ctx.fillStyle = m.color; roundRect(ctx, ix, by, Math.max(pw, 6), 6, 3, true); }
+    // 明细行
+    let iy = cardY + 68;
+    m.items.forEach(([name, val]) => {
+      ctx.textAlign = "left"; ctx.fillStyle = c.ts; ctx.font = `13px ${font}`;
+      ctx.fillText(name, ix, iy);
       const nameW = ctx.measureText(name).width;
       const valText = (val >= 0 ? "+" : "") + val.toFixed(1);
       ctx.font = `13px ${mono}`; const valW = ctx.measureText(valText).width;
-      const dotsStart = bx + 16 + nameW + 4;
-      const dotsEnd = bx + colW - 16 - valW - 4;
-      if (dotsEnd > dotsStart) {
-        ctx.fillStyle = c.dots;
-        for (let dx = dotsStart; dx < dotsEnd; dx += 6) ctx.fillRect(dx, iy - 2, 2, 1);
-      }
-      ctx.fillStyle = val < 0 ? c.danger : c.tp; ctx.font = `13px ${mono}`; ctx.textAlign = "right";
-      ctx.fillText(valText, bx + colW - 16, iy);
-      iy += 28;
+      const ds = ix + nameW + 6, de = ixr - valW - 6;
+      if (de > ds) { ctx.fillStyle = c.dots; for (let dx = ds; dx < de; dx += 6) ctx.fillRect(dx, iy - 4, 2, 1); }
+      ctx.textAlign = "right"; ctx.fillStyle = val < 0 ? c.danger : c.tp; ctx.font = `13px ${mono}`;
+      ctx.fillText(valText, ixr, iy);
+      iy += 21;
     });
+    cardY += cardH + 20;
   });
 
-  // Timestamp
+  // ── 页脚 ──
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, H - 54); ctx.lineTo(R, H - 54); ctx.stroke();
   const now = new Date();
   const ts2 = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  ctx.fillStyle = c.tm; ctx.font = `10px ${font}`; ctx.textAlign = "right";
-  ctx.fillText(`生成于 ${ts2}`, R, H - 36);
-
-  // Disclaimer
   ctx.fillStyle = c.tm; ctx.font = `11px ${font}`; ctx.textAlign = "left";
-  ctx.fillText("仅供参考，最终以学校/书院官方认定为准", L, H - 36);
-
-  // Watermark stamp
-  ctx.save();
-  ctx.globalAlpha = isDark ? 0.10 : 0.08;
-  ctx.translate(R - 60, H - 110);
-  ctx.rotate(-Math.PI / 12);
-  ctx.strokeStyle = c.danger;
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(0, 0, 36, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = c.danger; ctx.font = `bold 11px ${font}`; ctx.textAlign = "center";
-  ctx.fillText("仅供参考", 0, 4);
-  ctx.restore();
+  ctx.fillText("仅供参考，最终以学校 / 书院官方认定为准", L, H - 32);
+  ctx.font = `10px ${font}`; ctx.textAlign = "right";
+  ctx.fillText(`生成于 ${ts2}`, R, H - 32);
 
   return canvas;
 }
