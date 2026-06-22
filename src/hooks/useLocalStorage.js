@@ -70,9 +70,20 @@ export function saveUserContext(ctx) {
   try { localStorage.setItem(USER_CONTEXT_KEY, JSON.stringify(ctx)); } catch { /* ignore */ }
 }
 
+// 一键重置时清除推荐器偏好（排除项 + 我的现状）；RecommenderTab 重挂载后即读到空值。
+export function clearRecommenderPrefs() {
+  try {
+    localStorage.removeItem(EXCLUDED_KEY);
+    localStorage.removeItem(USER_CONTEXT_KEY);
+  } catch { /* ignore */ }
+}
+
 // ── 主题（深/浅色）──
 // 与 index.html 首屏内联脚本共用同一 key，保证刷新前后一致、且无白屏闪烁。
-const THEME_KEY = "deyu_theme";
+// 显式主题偏好键：仅当用户手动切换时写入；缺省 = 跟随系统浅/深色。
+// 键名相较旧版（deyu_theme）特意更名：旧版"挂载即持久化"会把跟随系统的值也写死，
+// 更名后这些旧值自动失效、回到"跟随系统"，手动切换则以新键持久化。
+const THEME_KEY = "deyu_theme_pref";
 
 export function loadTheme() {
   try {
@@ -86,4 +97,12 @@ export function loadTheme() {
 
 export function saveTheme(dark) {
   try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch { /* ignore */ }
+}
+
+// 用户是否手动选择过主题；为 false 时才继续跟随系统切换。
+export function hasExplicitTheme() {
+  try {
+    const t = localStorage.getItem(THEME_KEY);
+    return t === "dark" || t === "light";
+  } catch { return false; }
 }
